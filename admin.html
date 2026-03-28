@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Civix</title>
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <style>
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 10px; overflow: hidden; }
+        .admin-table th, .admin-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .admin-table th { background: #2d5a27; color: white; }
+        .approve-btn { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .role-select { padding: 5px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h3>Admin Center</h3></div>
+            <nav class="menu">
+                <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="workers.html" class="menu-item"><span>👥</span> Workers Directory</a>
+                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
+                <a href="admin.html" class="menu-item active"><span>👥</span> Admin Dashboard</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="top-bar">
+                <h2>Admin Dashboard</h2>
+                <button onclick="location.href='registration.html'" class="approve-btn" style="background: var(--primary);">+ Create New Employee</button>
+            </header>
+            
+            <section style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; display: none;">
+                <h3>Create New Employee ID</h3>
+                <div class="profile-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <input type="text" id="newEmpName" placeholder="Employee Full Name">
+                    <input type="email" id="newEmpEmail" placeholder="Employee Email">
+                    <input type="password" id="newEmpPass" placeholder="Employee Password">
+                    <select id="newEmpRole" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        <option value="Worker">Worker (View Only)</option>
+                        <option value="User/Creator">User/Creator (Full Access)</option>
+                    </select>
+                </div>
+                <button onclick="createEmployee()" class="approve-btn" style="margin-top: 15px; width: 200px;">Create ID</button>
+            </section>
+
+            <header class="top-bar"><h2>User Approval Requests</h2></header>
+            <div id="loading">Loading pending requests...</div>
+            <table class="admin-table" id="userTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Assign Role</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userList"></tbody>
+            </table>
+        </main>
+    </div>
+    <script>
+        const adminEmail = localStorage.getItem("regEmail");
+
+        async function createEmployee() {
+            const name = document.getElementById('newEmpName').value;
+            const email = document.getElementById('newEmpEmail').value;
+            const password = document.getElementById('newEmpPass').value;
+            const role = document.getElementById('newEmpRole').value;
+
+            try {
+                const response = await authorizedFetch('/api/admin/users/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminEmail, name, email, password, role })
+                });
+
+                if (response.ok) {
+                    alert('Employee account created successfully!');
+                    document.getElementById('newEmpName').value = '';
+                    document.getElementById('newEmpEmail').value = '';
+                    document.getElementById('newEmpPass').value = '';
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                alert('Connection failed.');
+            }
+        }
+
+        async function loadPendingUsers() {
+            try {
+                const response = await authorizedFetch(`/api/admin/users/pending?adminEmail=${adminEmail}`);
+                const users = await response.json();
+                
+                const userList = document.getElementById('userList');
+                userList.innerHTML = '';
+                
+                if (users.length === 0) {
+                    document.getElementById('loading').innerText = 'No pending requests.';
+                    return;
+                }
+                
+                users.forEach(user => {
+                    const row = `
+                        <tr>
+                            <td>${user.name || 'N/A'}</td>
+                            <td>${user.email}</td>
+                            <td><span style="color:orange">${user.status}</span></td>
+                            <td>
+                                <select class="role-select" id="role-${user.email}">
+                                    <option value="User/Creator">User/Creator</option>
+                                    <option value="Worker">Worker</option>
+                                    <option value="Admin">Admin</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="approve-btn" onclick="approveUser('${user.email}')">Approve</button>
+                            </td>
+                        </tr>
+                    `;
+                    userList.innerHTML += row;
+                });
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('userTable').style.display = 'table';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerText = 'Error loading requests.';
+            }
+        }
+
+        async function approveUser(email) {
+            const role = document.getElementById(`role-${email}`).value;
+            try {
+                const response = await authorizedFetch('/api/admin/users/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminEmail, userEmail: email, role })
+                });
+                
+                if (response.ok) {
+                    alert('User approved successfully!');
+                    loadPendingUsers();
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                alert('Failed to approve user.');
+            }
+        }
+
+        loadPendingUsers();
+    </script>
+</body>
+</html>

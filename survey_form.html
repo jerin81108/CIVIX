@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fill Survey Details - Civix</title>
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <style>
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .form_wrapper {
+            max-width: 620px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+        /* Survey Type Toggle */
+        .type-toggle {
+            display: flex;
+            background: white;
+            border-radius: 14px;
+            padding: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            gap: 6px;
+        }
+        .type-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #888;
+        }
+        .type-btn.active {
+            background: #2d5a27;
+            color: white;
+            box-shadow: 0 4px 12px rgba(45,90,39,0.3);
+        }
+        .type-btn:hover:not(.active) {
+            background: #f0f8f0;
+            color: #2d5a27;
+        }
+        /* Type badge banners */
+        .type-banner {
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .type-banner.new {
+            background: #e8f5e9;
+            color: #2d5a27;
+            border: 1px solid #a5d6a7;
+        }
+        .type-banner.old {
+            background: #fff8e1;
+            color: #8a6500;
+            border: 1px solid #ffe082;
+        }
+
+        /* Form Box */
+        .form_box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .form_box h2 {
+            margin: 0 0 22px;
+            font-size: 20px;
+            color: #1a3a17;
+        }
+        .field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 5px;
+            margin-top: 14px;
+        }
+        .form_box input[type="text"],
+        .form_box input[type="tel"],
+        .form_box input[type="date"],
+        .form_box input[type="file"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 9px;
+            font-size: 14px;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            background: #fafafa;
+        }
+        .form_box input:focus {
+            outline: none;
+            border-color: #2d5a27;
+            background: white;
+        }
+        .date-field-row {
+            display: none; /* hidden by default; shown for old surveys */
+        }
+        .live-time-display {
+            background: #e8f5e9;
+            border: 1.5px solid #a5d6a7;
+            border-radius: 9px;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d5a27;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .submit_btn {
+            width: 100%;
+            padding: 15px;
+            background: #2d5a27;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 22px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .submit_btn:hover { background: #1e3e1a; transform: translateY(-1px); }
+        .cancel_btn {
+            width: 100%;
+            padding: 13px;
+            background: #eee;
+            color: #555;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .cancel_btn:hover { background: #ddd; }
+        .file-note {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form_wrapper">
+
+        <!-- Only show type toggle for new entry (not edit) -->
+        <div class="type-toggle" id="typeToggle">
+            <button class="type-btn active" id="btnNew" onclick="setSurveyType('new')">
+                🟢 New Survey
+            </button>
+            <button class="type-btn" id="btnOld" onclick="setSurveyType('old')">
+                🕒 Old Survey
+            </button>
+        </div>
+
+        <!-- Banner -->
+        <div class="type-banner new" id="typeBanner">
+            📡 Live date &amp; time will be recorded automatically
+        </div>
+
+        <div class="form_box">
+            <h2 id="formTitle">Enter Survey Details</h2>
+            <form id="surveyDataForm">
+
+                <label class="field-label">Size of Place</label>
+                <input type="text" id="place_size" placeholder="e.g., 50×40 ft" required>
+
+                <label class="field-label">Location</label>
+                <input type="text" id="location" placeholder="Full address / location name" required>
+
+                <label class="field-label">Surveyed By (Employee)</label>
+                <input type="text" id="employee" placeholder="Employee name" required>
+
+                <label class="field-label">Client Name</label>
+                <input type="text" id="client" placeholder="Customer / client name" required>
+
+                <label class="field-label">Client Mobile Number</label>
+                <input type="tel" id="client_num" placeholder="e.g., 9876543210" required>
+
+                <label class="field-label">Area Name</label>
+                <input type="text" id="area" placeholder="Town / area / zone" required>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div>
+                        <label class="field-label">Instrument Used</label>
+                        <input type="text" id="instrument" placeholder="e.g., Total Station, GPS" value="Total Station">
+                    </div>
+                    <div>
+                        <label class="field-label">Scale Factor</label>
+                        <input type="text" id="scaleFactor" placeholder="e.g., 0.9999" value="1.0000">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div>
+                        <label class="field-label">Temp (°C)</label>
+                        <input type="text" id="tempC" placeholder="e.g., 32" value="25">
+                    </div>
+                </div>
+
+                <!-- Date: shown for Old Survey mode; hidden for New -->
+                <div class="date-field-row" id="dateFieldRow">
+                    <label class="field-label">Survey Date (Historical)</label>
+                    <input type="date" id="survey_date">
+                </div>
+
+                <!-- For New Survey: show live clock -->
+                <div id="liveDateDisplay" style="margin-top:14px;">
+                    <label class="field-label">Date &amp; Time (Auto)</label>
+                    <div class="live-time-display">
+                        <span>🕐</span>
+                        <span id="clockDisplay">Loading...</span>
+                    </div>
+                </div>
+
+                <label class="field-label" style="margin-top:18px;">Attach File <span style="font-weight:400; color:#bbb;">(Optional)</span></label>
+                <input type="file" id="survey_file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                <p class="file-note">Accepted: PDF, JPG, PNG, DOC, DOCX</p>
+
+                <button type="button" class="submit_btn" id="submitBtn" onclick="saveAndUpload()">
+                    Upload Survey
+                </button>
+                <button type="button" class="cancel_btn" onclick="window.history.back()">
+                    Cancel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('id');
+        let surveyType = 'new'; // 'new' or 'old'
+
+        // Live clock
+        function updateClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+            const timeStr = now.toLocaleTimeString('en-IN');
+            document.getElementById('clockDisplay').textContent = `${dateStr}  •  ${timeStr}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Toggle between New and Old survey
+        function setSurveyType(type) {
+            surveyType = type;
+            document.getElementById('btnNew').classList.toggle('active', type === 'new');
+            document.getElementById('btnOld').classList.toggle('active', type === 'old');
+            document.getElementById('dateFieldRow').style.display   = (type === 'old') ? 'block' : 'none';
+            document.getElementById('liveDateDisplay').style.display = (type === 'new') ? 'block' : 'none';
+
+            const banner = document.getElementById('typeBanner');
+            if (type === 'new') {
+                banner.className = 'type-banner new';
+                banner.innerHTML = '📡 Live date &amp; time will be recorded automatically';
+            } else {
+                banner.className = 'type-banner old';
+                banner.innerHTML = '📅 Enter the original survey date below';
+            }
+        }
+
+        // On load — handle edit mode
+        window.onload = async function() {
+            if (editId) {
+                // Edit mode: hide type toggle, just show form
+                document.getElementById('typeToggle').style.display = 'none';
+                document.getElementById('typeBanner').style.display = 'none';
+                document.getElementById('liveDateDisplay').style.display = 'none';
+                document.getElementById('dateFieldRow').style.display = 'block';
+                document.getElementById('formTitle').innerText = 'Edit Survey Details';
+                document.getElementById('submitBtn').innerText  = 'Update Survey';
+
+                try {
+                    const response = await authorizedFetch(`/api/surveys/${editId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('place_size').value  = data.size   || '';
+                        document.getElementById('location').value    = data.loc    || '';
+                        document.getElementById('employee').value    = data.emp    || '';
+                        document.getElementById('client').value      = data.cli    || '';
+                        document.getElementById('client_num').value  = data.cliNum || '';
+                        document.getElementById('area').value        = data.area   || '';
+                        document.getElementById('survey_date').value = data.date   || '';
+                        document.getElementById('instrument').value  = data.instrument || 'Total Station';
+                        document.getElementById('scaleFactor').value = data.scaleFactor || '1.0000';
+                        document.getElementById('tempC').value       = data.tempC || '25';
+                    }
+                } catch (err) {
+                    console.error('Error fetching survey for edit:', err);
+                }
+            }
+        };
+
+        // Submit
+        async function saveAndUpload() {
+            const now = new Date();
+            const userEmail  = localStorage.getItem('regEmail');
+            const fileInput  = document.getElementById('survey_file');
+
+            // Determine date/time based on survey type
+            let finalDate, finalTime;
+            if (editId || surveyType === 'old') {
+                const pickedDate = document.getElementById('survey_date').value;
+                if (!pickedDate) {
+                    alert('Please pick the survey date.');
+                    document.getElementById('survey_date').focus();
+                    return;
+                }
+                finalDate = pickedDate;
+                finalTime = '00:00:00'; // time unknown for historical entries
+            } else {
+                // New survey — use live date/time
+                finalDate = now.toISOString().split('T')[0];          // YYYY-MM-DD
+                finalTime = now.toLocaleTimeString('en-IN');           // HH:MM:SS
+            }
+
+            const formData = new FormData();
+            formData.append('size',      document.getElementById('place_size').value);
+            formData.append('loc',       document.getElementById('location').value);
+            formData.append('emp',       document.getElementById('employee').value);
+            formData.append('cli',       document.getElementById('client').value);
+            formData.append('cliNum',    document.getElementById('client_num').value);
+            formData.append('area',      document.getElementById('area').value);
+            formData.append('instrument', document.getElementById('instrument').value);
+            formData.append('scaleFactor', document.getElementById('scaleFactor').value);
+            formData.append('tempC',       document.getElementById('tempC').value);
+            formData.append('date',      finalDate);
+            formData.append('time',      finalTime);
+            formData.append('createdBy', userEmail);
+            if (editId) formData.append('updatedBy', userEmail);
+
+            if (fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            const url    = editId ? `/api/surveys/${editId}` : '/api/surveys';
+            const method = editId ? 'PUT' : 'POST';
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+
+            try {
+                const response = await authorizedFetch(url, { method, body: formData });
+                if (response.ok) {
+                    alert('✨ Great job! Your survey has been saved successfully. Another accurate record for B.K. BUILDERS! Keep it up!');
+                    window.location.href = 'survey.html';
+                } else {
+                    const errData = await response.json();
+                    throw new Error(errData.message || 'Server error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = editId ? 'Update Survey' : 'Upload Survey';
+            }
+        }
+
+        // Apply dark mode
+        (function() {
+            if (localStorage.getItem('darkMode') === 'enabled') document.body.classList.add('dark_theme');
+        })();
+    </script>
+</body>
+</html>

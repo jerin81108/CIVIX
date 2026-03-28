@@ -1,0 +1,22 @@
+node_modules/
+.venv/
+
+# Secrets
+server/firebase-adminsdk.json
+server/.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Database
+server/civix.db
+
+# Temp/debug files
+*.txt
+firebase-debug.log
+server/output.txt
+
+# OS files
+.DS_Store
+Thumbs.db

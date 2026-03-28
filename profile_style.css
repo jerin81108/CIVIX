@@ -1,0 +1,78 @@
+.profile-card {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    max-width: 800px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 30px;
+}
+
+.profile-pic-container {
+    position: relative;
+    text-align: center;
+}
+
+#profilePreview {
+    width: 120px;
+    height: 120px;
+    border-radius: 15px;
+    object-fit: cover;
+    border: 3px solid #eee;
+}
+
+.upload-label {
+    display: block;
+    font-size: 12px;
+    color: var(--primary);
+    cursor: pointer;
+    margin-top: 5px;
+    text-decoration: underline;
+}
+
+#logoUpload { display: none; }
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.input-group input, .input-group textarea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fcfcfc;
+}
+
+.save-btn {
+    grid-column: span 2;
+    padding: 15px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.save-btn:hover { background: #23471e; }

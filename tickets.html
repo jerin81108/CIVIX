@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Change Requests (Tickets) - Civix</title>
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <style>
+        .ticket-card { background: white; padding: 25px; border-radius: 18px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-left: 8px solid #f1c40f; transition: 0.3s; }
+        .ticket-card.Approved { border-color: #2ecc71; opacity: 0.8; }
+        .ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .ticket-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .diff-box { background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1.5px dashed #eee; }
+        .old-val { color: #888; text-decoration: line-through; display: block; font-size: 13px; }
+        .new-val { color: #2d5a27; font-weight: 800; display: block; font-size: 15px; margin-top: 5px; }
+        .approve-btn { background: #2d5a27; color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .approve-btn:hover { background: #1e3e1a; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .Pending { background: #fff5e6; color: #d68910; }
+        .Approved { background: #e8f5e9; color: #2ecc71; }
+    </style>
+</head>
+<body style="background: #f8fbf8;">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="mini-logo" id="sidebarLogo" style="overflow:hidden">CS</div>
+                <h3 id="displayCompany">CIVIX</h3>
+            </div>
+            <nav class="menu">
+                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
+                <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="messages.html" class="menu-item"><span>✉️</span> Guest Messages</a>
+                <a href="tickets.html" class="menu-item active"><span>🎫</span> Change Requests</a>
+                <a href="workers.html" class="menu-item"><span>👥</span> Employee Directory</a>
+                <a href="admin.html" class="menu-item"><span>✔️</span> Approvals</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div style="flex:1;">
+                    <h2 style="margin-bottom: 5px;">Change Verification (Tickets)</h2>
+                    <p style="font-size: 13px; color: #888; font-weight: 500;">Review proposed corrections from your employees.</p>
+                </div>
+            </header>
+
+            <div id="loading" style="text-align: center; padding: 50px; color: #888;">Scanning for pending tickets...</div>
+            <div id="ticketContainer"></div>
+        </main>
+    </div>
+
+    <script>
+        const adminEmail = localStorage.getItem("regEmail");
+        const adminRole = localStorage.getItem("userRole");
+
+        if (adminRole !== "Admin") {
+            window.location.href = "home.html";
+        }
+
+        async function loadTickets() {
+            try {
+                const res = await authorizedFetch(`/api/tickets/all?adminEmail=${adminEmail}`);
+                const tickets = await res.json();
+                
+                const container = document.getElementById('ticketContainer');
+                container.innerHTML = '';
+                
+                if (tickets.length === 0) {
+                    document.getElementById('loading').innerText = 'No change requests found.';
+                    return;
+                }
+                
+                tickets.forEach(t => {
+                    const card = document.createElement('div');
+                    card.className = `ticket-card ${t.status}`;
+                    
+                    const fieldLabels = {
+                        cli: 'Client Name',
+                        cliNum: 'Client Phone',
+                        loc: 'Location',
+                        size: 'Size',
+                        area: 'Area',
+                        instrument: 'Instrument',
+                        scaleFactor: 'Scale Factor',
+                        tempC: 'Temperature'
+                    };
+
+                    card.innerHTML = `
+                        <div class="ticket-header">
+                            <div>
+                                <span class="status-badge ${t.status}">${t.status}</span>
+                                <strong style="margin-left:10px; color:#2c3e50;">Survey Ticket #${t.surveyId}</strong>
+                            </div>
+                            <span style="font-size:12px; color:#aaa;">Request Date: ${new Date(t.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div style="margin-bottom:15px; font-size:14px; color:#666;">
+                            <strong>Ref:</strong> ${t.clientName} at ${t.location}
+                        </div>
+                        <div class="ticket-body">
+                            <div class="diff-box">
+                                <span style="font-size:10px; color:#888; font-weight:700;">PROPOSED CHANGE ON: ${fieldLabels[t.fieldName] || t.fieldName}</span>
+                                <div style="margin-top:10px;">
+                                    <span class="old-val">Was: ${t.oldValue}</span>
+                                    <span class="new-val">Change to: ${t.newValue}</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
+                                <p style="font-size:11px; color:#888; margin-bottom:10px;">Requested by: ${t.requestedBy}</p>
+                                ${t.status === 'Pending' ? `
+                                    <button class="approve-btn" onclick="approveTicket(${t.id})">Approve & Apply Correct</button>
+                                ` : `<button disabled class="approve-btn" style="background:#eee; color:#aaa; cursor:default;">Processed</button>`}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('displayCompany').innerText = localStorage.getItem("regCompany") || "CIVIX";
+                loadSavedLogo();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerText = 'Failed to load tickets.';
+            }
+        }
+
+        async function approveTicket(id) {
+            if(!confirm("Are you sure you want to approve this change? It will update the Survey Log permanently.")) return;
+
+            try {
+                const res = await authorizedFetch('/api/tickets/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminEmail, ticketId: id })
+                });
+                
+                if (res.ok) {
+                    alert("Change Applied! Record has been updated.");
+                    loadTickets();
+                } else {
+                    const data = await res.json();
+                    alert("Error: " + data.message);
+                }
+            } catch (err) {
+                alert("Connection error.");
+            }
+        }
+
+        function loadSavedLogo() {
+            const savedLogo = localStorage.getItem("companyLogo");
+            const sidebarLogoDiv = document.getElementById('sidebarLogo');
+            if (savedLogo && sidebarLogoDiv) {
+                sidebarLogoDiv.innerHTML = `<img src="${savedLogo}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+        }
+
+        loadTickets();
+    </script>
+</body>
+</html>

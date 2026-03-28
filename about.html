@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expertise - B.K. Builders Survey Portal</title>
+    <!-- Auth Guard MUST be first -->
+    <script src="auth_guard.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="home_style.css">
+    <style>
+        :root {
+            --primary-emerald: #2d5a27;
+            --accent-gold: #f1c40f;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #121212;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        /* Glassmorphism Expertise Container */
+        .expertise_canvas {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeInCanvas 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInCanvas {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Expertise Banner */
+        .hero_banner {
+            position: relative;
+            height: 400px;
+            border-radius: 30px;
+            background: url('expertise_hero.png') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            margin-bottom: 50px;
+        }
+
+        .hero_banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(10, 26, 10, 0.8), transparent);
+        }
+
+        .hero_content {
+            position: relative;
+            z-index: 2;
+            color: white;
+            text-align: left;
+            width: 80%;
+        }
+
+        .hero_content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 0%, #f1c40f 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .hero_content p {
+            font-size: 1.4rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        /* Expertise Grid Cards */
+        .expertise_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .expertise_card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            padding: 35px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .expertise_card:hover {
+            transform: translateY(-15px) scale(1.03);
+            background: rgba(45, 90, 39, 0.9);
+            border-color: #f1c40f;
+            box-shadow: 0 25px 50px rgba(45, 90, 39, 0.3);
+        }
+
+        .expertise_card:hover * {
+            color: white !important;
+        }
+
+        .icon_box {
+            font-size: 45px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+            background: rgba(45, 90, 39, 0.1);
+            border-radius: 18px;
+            transition: 0.3s;
+        }
+
+        .expertise_card:hover .icon_box {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(10deg);
+        }
+
+        .card_title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-emerald);
+        }
+
+        .card_description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        /* Technical Seal Section */
+        .technical_seal {
+            background: url('expertise_tech.png') center/cover;
+            height: 300px;
+            border-radius: 30px;
+            margin-top: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .technical_seal::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 20, 30, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        .seal_content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .seal_content h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        /* Footer Quote */
+        .quote_box {
+            text-align: center;
+            padding: 80px 0;
+            font-style: italic;
+            color: #777;
+            font-size: 1.2rem;
+        }
+
+        /* Custom Dark Theme Styles for Expertise */
+        body.dark_theme {
+            background: #0a0a0a;
+            color: #eee;
+        }
+
+        body.dark_theme .expertise_card {
+            background: rgba(30, 30, 30, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark_theme .card_description {
+            color: #bbb;
+        }
+
+        body.dark_theme .icon_box {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark_theme .card_title {
+            color: #f1c40f;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="mini-logo" id="sidebarLogo">
+                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path><path d="M12 8l-2 4h4l-2 4"></path></svg>
+                </div>
+                <h3 id="sidebarCompanyName">B.K. Builders</h3>
+            </div>
+            <nav class="menu" id="sideMenu">
+                <p class="menu-label">Main Menu</p>
+                <a href="home.html" class="menu-item restricted"><span>🏠</span> Home</a>
+                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
+                <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="about.html" class="menu-item active"><span>✨</span> About Creator</a>
+
+                <a href="geo_map.html" class="menu-item restricted"><span>📍</span> Geo Map</a>
+                <a href="settings.html" class="menu-item restricted"><span>⚙️</span> Settings</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="location.href='index.html'" class="logout-btn">Back to Site</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="expertise_canvas">
+                <section class="hero_banner">
+                    <div class="hero_content">
+                        <h1>Civix: Engineering Precision</h1>
+                        <p>Mapping the future with government-approved accuracy and technical mastery.</p>
+                    </div>
+                </section>
+
+                <div class="expertise_grid">
+                    <!-- Creator Card -->
+                    <div class="expertise_card" style="grid-column: span 1; border-left: 5px solid #f1c40f;">
+                        <div class="icon_box">👨‍💻</div>
+                        <div class="card_title">About the Creator</div>
+                        <div class="card_description">
+                            <strong style="color: #2d5a27; font-size: 1.1rem;">Jerin</strong><br>
+                            <em>Lead System Architect & Civil Tech Visionary</em><br><br>
+                            Specializing in the intersection of Civil Engineering and Digital Infrastructure. Jerin designed Civix to solve real-world problems in land surveying, focusing on data integrity, high-precision mapping, and automated survey logging.
+                        </div>
+                    </div>
+
+                    <div class="expertise_card">
+                        <div class="icon_box">📐</div>
+                        <div class="card_title">I.F. Plan Mastery</div>
+                        <div class="card_description">Specialized Infrastructural Framework mapping with millimeter precision. We translate complex site data into executable blueprints.</div>
+                    </div>
+                    <div class="expertise_card">
+                        <div class="icon_box">🏗️</div>
+                        <div class="card_title">Model Architecture</div>
+                        <div class="card_description">Advanced structural modeling and plan generation for residential and commercial projects. Built on 15+ years of surveyor expertise.</div>
+                    </div>
+                </div>
+
+                <div class="expertise_grid" style="margin-top: 25px;">
+                    <div class="expertise_card">
+                        <div class="icon_box">🚸</div>
+                        <div class="card_title">Compliance & Safety</div>
+                        <div class="card_description">Evacuation boards and regulatory compliance mapping. Ensuring every project meets the highest safety standards and govt protocols.</div>
+                    </div>
+                    <div class="expertise_card">
+                        <div class="icon_box">📊</div>
+                        <div class="card_title">Asset Valuation</div>
+                        <div class="card_description">Precise property estimation and land valuation services. Leveraging historical logs and current market data for absolute accuracy.</div>
+                    </div>
+                </div>
+
+                <section class="technical_seal">
+                    <div class="seal_content">
+                        <h2>Precision & Innovation</h2>
+                        <p>Combining Jerin's modern architecture with B.K. Builders' 15+ years of trust in Tirupur.</p>
+                    </div>
+                </section>
+
+                <div class="quote_box">
+                    "Precision is not just a measurement; it's a commitment to the landmarks we build."
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sync Data from LocalStorage
+        window.addEventListener('DOMContentLoaded', function() {
+            const company = localStorage.getItem("regCompany") || localStorage.getItem("registeredCompany") || "B.K. Builders";
+            document.getElementById('sidebarCompanyName').innerText = company;
+            
+            // Apply Saved Logo
+            const savedLogo = localStorage.getItem("companyLogo");
+            const logoContainer = document.getElementById('sidebarLogo');
+            if (savedLogo && logoContainer) {
+                logoContainer.innerHTML = `<img src="${savedLogo}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+
+            // Apply Theme
+            if (localStorage.getItem("darkMode") === "enabled") {
+                document.body.classList.add("dark_theme");
+            }
+
+            // Role Restrictions for Workers
+            const role = localStorage.getItem("userRole");
+            if (role === "Worker") {
+                document.querySelectorAll(".restricted").forEach(el => el.style.display = "none");
+            }
+        });
+    </script>
+</body>
+</html>

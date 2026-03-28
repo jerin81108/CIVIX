@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Survey Dashboard</title>
+    <!-- Auth Guard MUST be first -->
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container surveying-vibe">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="mini-logo">
+                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path><path d="M12 8l-2 4h4l-2 4"></path></svg>
+                </div>
+                <h3 id="displayCompany">Loading...</h3>
+            </div>
+            
+            <nav class="menu">
+                <p class="menu-label">Main Menu</p>
+                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
+                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
+                <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
+                <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
+                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
+                <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
+
+                <a href="settings.html" class="menu-item"><span>⚙️</span> Settings</a>
+                <a href="geo_map.html" class="menu-item"><span>📍</span> Geo Map</a>
+               <p class="menu-label">Project Intelligence</p>
+                <div class="menu-item locked"><span>📍</span> Land Mapping (Soon)</div>
+                <div class="menu-item active"><span>📊</span> Analytics</div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h2 style="margin: 0;">Welcome back, <span id="welcomeName">User</span></h2>
+                    <div class="live-pulse-container" style="display: flex; align-items: center; gap: 6px; background: rgba(46, 204, 113, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(46, 204, 113, 0.2);">
+                        <span class="pulse-dot"></span>
+                        <span style="font-size: 10px; font-weight: 800; color: #2ecc71; text-transform: uppercase; letter-spacing: 0.5px;">Live Sync</span>
+                    </div>
+                </div>
+                <div class="date-display" id="currentDate"></div>
+            </header>
+
+            <section class="premium-stats-grid" style="margin-top: 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; animation: slideUp 0.6s ease-out;">
+                <div class="card stat-card-glass">
+                    <span class="stat-label">Total Volume</span>
+                    <h3 id="total_surveys_stat">2,481</h3>
+                    <span class="stat-trend">↑ 12% Month</span>
+                </div>
+                <div class="card stat-card-glass">
+                    <span class="stat-label">Active Sites</span>
+                    <h3>42</h3>
+                    <span class="stat-trend" style="color:#3498db;">Global UTM Tracking</span>
+                </div>
+                <div class="card stat-card-glass">
+                    <span class="stat-label">Team Pulse</span>
+                    <h3>98%</h3>
+                    <span class="stat-trend">Standardized Error</span>
+                </div>
+                <div class="card stat-card-glass">
+                    <span class="stat-label">Efficiency</span>
+                    <h3>0.02s</h3>
+                    <span class="stat-trend" style="color:#e67e22;">Latency Optimized</span>
+                </div>
+            </section>
+                <section class="dashboard_grid">
+                    <div class="card survey-card-premium">
+                        <div class="card_icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2d5a27" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                        </div>
+                        <div class="card_info">
+                            <span class="label">Mapped Units</span>
+                            <h2 id="total_survey_count">0</h2>
+                        </div>
+                        <div class="card_progress_bar"><div class="fill" style="width: 75%;"></div></div>
+                    </div>
+
+                    <div class="card survey-card-premium" id="appointment_card">
+                        <div class="card_icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+                        </div>
+                        <div class="card_info">
+                            <span class="label">Field Schedule</span>
+                            <h2 id="appointment_status">On Track</h2>
+                            <p id="appointment_detail" style="font-size: 11px; color: #2ecc71; font-weight: bold;">Precision in Progress</p>
+                        </div>
+                    </div>
+
+                    <div class="card motivation-card">
+                        <div class="card_info">
+                            <span class="label">💡 Daily Inspiration</span>
+                            <p id="engineers_quote" style="font-style: italic; font-size: 13px; color: #444; margin-top: 5px;">"Engineering is the art of directing the great sources of power in nature for the use and convenience of man."</p>
+                            <span id="quote_author" style="font-size: 11px; color: #888; font-weight: 600;">— Thomas Tredgold</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- New Analytics Section -->
+                <section class="analytics-showcase" style="margin-top: 40px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                    <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
+                        <h3 style="margin-top: 0; color: #2d5a27;">📈 Survey Velocity</h3>
+                        <div style="width: 100%; height: 250px;">
+                            <canvas id="velocityChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
+                        <h3 style="margin-top: 0; color: #2d5a27;">📍 Map Distribution</h3>
+                        <div style="width: 100%; height: 250px;">
+                            <canvas id="locationChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+                <div class="fab_container">
+                    <a href="survey_form.html" class="fab_main">
+                        <div class="fab_icon_circle">
+                            <span class="plus_sign">+</span>
+                        </div>
+                        <span class="fab_text">New Survey</span>
+                    </a>
+                </div>
+                <!-- Technical Telemetry Section (Minute Details) -->
+                <section class="technical-telemetry" style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #f1c40f;">
+                        <span class="label" style="font-size: 10px; color: #888;">🛰️ GNSS STATUS</span>
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <span style="font-weight: 800; color: #2d5a27;">FIXED (RTK)</span>
+                            <span style="color: #2ecc71; font-size: 12px;">● Online</span>
+                        </div>
+                        <p style="font-size: 11px; margin: 0; color: #666;">H: 0.008m | V: 0.015m</p>
+                    </div>
+                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #3498db;">
+                        <span class="label" style="font-size: 10px; color: #888;">🌏 COORDINATE SYSTEM</span>
+                        <span style="font-weight: 800; color: #333;">UTM ZONE 44N</span>
+                        <p style="font-size: 11px; margin: 0; color: #666;">WGS84 Ellipsoid | EPSG:32644</p>
+                    </div>
+                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #e67e22;">
+                        <span class="label" style="font-size: 10px; color: #888;">📐 INSTRUMENT ERROR</span>
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <span style="font-weight: 800; color: #333;">2.4" ARC SEC</span>
+                            <span style="color: #e67e22; font-size: 10px;">Calibrated</span>
+                        </div>
+                        <p style="font-size: 11px; margin: 0; color: #666;">Compensator: Enabled</p>
+                    </div>
+                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #9b59b6;">
+                        <span class="label" style="font-size: 10px; color: #888;">🏗️ SCALE FACTOR</span>
+                        <span style="font-weight: 800; color: #333;">0.99994520</span>
+                        <p style="font-size: 11px; margin: 0; color: #666;">Grid to Ground Correction</p>
+                    </div>
+                </section>
+
+                <section class="welcome_header" style="animation: fadeIn 1s ease;">
+                    <div class="greeting_box" style="flex: 1;">
+                        <h1 id="dynamic_greeting" style="font-size: 2.2rem; margin-bottom: 5px;">Welcome!</h1>
+                        <p id="civil_fact" class="fact_text" style="background: rgba(45, 90, 39, 0.05); padding: 12px 20px; border-radius: 12px; border-left: 4px solid #f1c40f;">Loading civil engineering fact...</p>
+                    </div>
+                    
+                    <div class="weather_widget tech-widget" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d5a27 100%); color: white; padding: 20px; border-radius: 22px; width: 220px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+                        <div id="weather_icon" style="font-size: 30px; margin-bottom: 5px;">🛰️</div>
+                        <div class="weather_info">
+                            <h2 id="temp_display" style="margin: 0; font-size: 1.8rem;">28°C</h2>
+                            <p id="weather_desc" style="margin: 2px 0; font-size: 12px; opacity: 0.8;">G.P.S Locked</p>
+                            <div style="display: flex; gap: 10px; font-size: 9px; margin-top: 8px; font-weight: 700;">
+                                <span>💨 12KM/H</span>
+                                <span>💧 64%</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Function to apply the theme instantly on page load
+        (function applyTheme() {
+            const theme = localStorage.getItem("darkMode");
+            if (theme === "enabled") {
+                document.body.classList.add("dark_theme");
+            } else {
+                document.body.classList.remove("dark_theme");
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 1. IDENTITY & NAVIGATION
+            const regCompany = localStorage.getItem("regCompany") || localStorage.getItem("registeredCompany") || "User";
+            const userRole = localStorage.getItem("userRole");
+            
+            document.getElementById("displayCompany").innerText = regCompany;
+            document.getElementById("welcomeName").innerText = regCompany;
+            
+            if (userRole === "Admin") {
+                document.getElementById("adminLink").style.display = "block";
+                if (document.getElementById("workerLink")) document.getElementById("workerLink").style.display = "block";
+                if (document.getElementById("ticketLink")) document.getElementById("ticketLink").style.display = "block";
+                if (document.getElementById("msgLink")) document.getElementById("msgLink").style.display = "block";
+            }
+
+            // 2. LOGO LOADING
+            const savedLogo = localStorage.getItem("companyLogo");
+            const sidebarLogoDiv = document.querySelector('.mini-logo');
+            if (savedLogo && sidebarLogoDiv) {
+                sidebarLogoDiv.innerHTML = `<img src="${savedLogo}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+
+            // 3. DYNAMIC GREETING & DATE
+            const hours = new Date().getHours();
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const today = days[new Date().getDay()];
+            let greeting = "Good Evening";
+            if (hours < 12) greeting = "Good Morning";
+            else if (hours < 17) greeting = "Good Afternoon";
+            
+            document.getElementById('dynamic_greeting').innerText = `${greeting}, ${regCompany}! 🏗️`;
+            document.getElementById('currentDate').innerHTML = `<span>📅</span> Happy ${today}, ${new Date().toLocaleDateString()}`;
+
+            // 4. WEATHER & ENVIRONMENT (Minute Detail)
+            const conditions = [
+                { temp: "31°C", desc: "Optimal for Survey", icon: "☀️" },
+                { temp: "24°C", desc: "Rain Alert (Halt)", icon: "🌧️" },
+                { temp: "27°C", desc: "Atmospheric Drift", icon: "☁️" },
+                { temp: "29°C", desc: "Clear Visibility", icon: "🛰️" }
+            ];
+            const randomWeather = conditions[Math.floor(Math.random() * conditions.length)];
+            document.getElementById('temp_display').innerText = randomWeather.temp;
+            document.getElementById('weather_desc').innerText = randomWeather.desc;
+            document.getElementById('weather_icon').innerText = randomWeather.icon;
+
+            // 5. SURVEY DATA & STATS
+            let allSurveys = [];
+            const userEmail = localStorage.getItem("regEmail");
+            try {
+                const response = await authorizedFetch(`/api/surveys?email=${userEmail}`);
+                if (response.ok) allSurveys = await response.json();
+                else throw new Error('API Error');
+            } catch (error) {
+                console.warn('Dashboard: Using fallback data');
+                allSurveys = JSON.parse(localStorage.getItem('survey_reports')) || [];
+            }
+            
+            document.getElementById('total_survey_count').innerText = allSurveys.length;
+            document.getElementById('total_surveys_stat').innerText = allSurveys.length.toLocaleString();
+
+            // Today's Appointments
+            const tDate = new Date().toLocaleDateString();
+            const todaysEntries = allSurveys.filter(s => s.date === tDate);
+            const statusText = document.getElementById('appointment_status');
+            const statusDetail = document.getElementById('appointment_detail');
+            const appointmentCard = document.getElementById('appointment_card');
+
+            if (todaysEntries.length > 0) {
+                statusText.innerText = `${todaysEntries.length} Unit(s) Today`;
+                statusDetail.innerText = "Active field operations detected.";
+                appointmentCard.style.borderLeft = "6px solid #f39c12"; 
+            } else {
+                statusText.innerText = "Log Standby";
+                statusDetail.innerText = "No records added today.";
+            }
+
+            // 6. ANALYTICS
+            try {
+                const analyticsRes = await window.authorizedFetch(`/api/analytics`);
+                if (analyticsRes.ok) {
+                    const data = await analyticsRes.json();
+                    
+                    new Chart(document.getElementById('velocityChart'), {
+                        type: 'line',
+                        data: {
+                            labels: data.monthly.map(m => m.month).reverse(),
+                            datasets: [{
+                                label: 'Surveys',
+                                data: data.monthly.map(m => m.count).reverse(),
+                                borderColor: '#2d5a27',
+                                backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+
+                    new Chart(document.getElementById('locationChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.locations.map(l => l.loc),
+                            datasets: [{
+                                data: data.locations.map(l => l.count),
+                                backgroundColor: ['#2d5a27', '#2ecc71', '#f1c40f', '#e67e22', '#34495e'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                    });
+                }
+            } catch (err) { console.error("Charts failed:", err); }
+
+            // 7. CIVIL FACTS & MOTIVATION
+            const civilFacts = ["Concrete is second most consumed after water.", "Civil engineering is one of the oldest disciplines.", "Total Stations measure to 1/3600th of a degree.", "Sub-centimeter accuracy attainable with RTK."];
+            document.getElementById('civil_fact').innerText = civilFacts[Math.floor(Math.random() * civilFacts.length)];
+
+            const quotes = [
+                { q: "Engineering is the art of directing power in nature.", a: "Thomas Tredgold" },
+                { q: "Precision is not an option, it is the standard.", a: "Civix Team" }
+            ];
+            const q = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('engineers_quote').innerText = `"${q.q}"`;
+            document.getElementById('quote_author').innerText = `— ${q.a}`;
+        });
+    </script>
+</body>
+</html>

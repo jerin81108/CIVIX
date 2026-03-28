@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Profile - Civix</title>
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <link rel="stylesheet" href="profile_style.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="mini-logo" id="sidebarLogo" style="overflow:hidden">CS</div>
+                <h3 id="sidebarCompanyName">Company</h3>
+            </div>
+            <nav class="menu">
+                <p class="menu-label">Main Menu</p>
+                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
+                <a href="profile.html" class="menu-item active"><span>👤</span> Profile</a>
+                <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
+                <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h2>Manage Profile</h2>
+                <div id="roleBadge" style="padding: 5px 15px; background: #eee; border-radius: 20px; font-size: 12px; font-weight: bold;">User</div>
+            </header>
+
+            <section class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-pic-container">
+                        <img id="profilePreview" src="https://via.placeholder.com/150" alt="Logo">
+                        <input type="file" id="logoUpload" accept="image/*" onchange="previewImage(event)">
+                        <label for="logoUpload" class="upload-label">Change Photo</label>
+                    </div>
+                    <div class="header-info">
+                        <h1 id="headerCompanyName">Loading...</h1>
+                        <p id="userRoleText" style="color: #666; margin: 0;">Business Owner</p>
+                    </div>
+                </div>
+
+                <form id="profileForm" class="profile-grid">
+                    <div class="input-group" style="grid-column: 1 / -1;">
+                        <label>Company Name</label>
+                        <input type="text" id="editCompanyName" value="B.K. BUILDERS">
+                    </div>
+                    <div class="input-group" style="grid-column: 1 / -1;">
+                        <label>Description / Profession</label>
+                        <input type="text" id="editDesc" value="LICENSED BUILDING SURVEYOR">
+                    </div>
+                    <div class="input-group">
+                        <label>Authorized Engineers / Surveyors</label>
+                        <textarea id="editEngineers" rows="3">Er. B. NANCY, D.C.E., B.E.,&#10;Er. B. KAMALAM, D.C.E.,&#10;S.A. BABU, P.Tech.</textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Registered Email</label>
+                        <input type="email" id="editEmail" value="shanthiniprinttech@gmail.com" readonly style="background: #f9f9f9; cursor: not-allowed;">
+                    </div>
+                    <div class="input-group">
+                        <label>Phone Contacts</label>
+                        <textarea id="editPhone" rows="3">93853 47629&#10;98654 40629&#10;75982 40629</textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Office Address</label>
+                        <textarea id="editAddress" rows="3">30, 2nd Floor, (Opp) R.I.Office,&#10;Rice Mandi St, Tirupur - 4.</textarea>
+                    </div>
+                    <div class="input-group" style="grid-column: 1 / -1;">
+                        <label>Services Offered</label>
+                        <textarea id="editServices" rows="2">I.F. Plan, Model Plan & Evacuation Board, Estimate, Valuation All Planning Works.</textarea>
+                    </div>
+                    <button type="button" class="save-btn" style="background: var(--primary);" onclick="saveProfile()">Update Details</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Priority to loaded data, but fallback to B.K Builders Defaults
+            const name = localStorage.getItem("regCompany") || "B.K. BUILDERS";
+            const email = localStorage.getItem("regEmail") || "shanthiniprinttech@gmail.com";
+            const role = localStorage.getItem("userRole") || "User";
+
+            // If local storage has specific names we override, but we keep the form pre-filled with the card otherwise.
+            if(localStorage.getItem("regCompany")) document.getElementById('editCompanyName').value = name;
+            if(email) document.getElementById('editEmail').value = email;
+
+            document.getElementById('headerCompanyName').innerText = document.getElementById('editCompanyName').value;
+            document.getElementById('sidebarCompanyName').innerText = document.getElementById('editCompanyName').value;
+            document.getElementById('roleBadge').innerText = role;
+            document.getElementById('userRoleText').innerText = role === "Admin" ? "Company Owner" : "Employee";
+
+            if (localStorage.getItem("userRole") === "Admin") {
+                document.getElementById("adminLink").style.display = "block";
+                if (document.getElementById("workerLink")) document.getElementById("workerLink").style.display = "block";
+            } else {
+                // Restrict profile to Read-Only if not Master
+                const inputs = document.querySelectorAll('#profileForm input, #profileForm textarea');
+                inputs.forEach(input => {
+                    input.readOnly = true;
+                    input.style.background = '#f9f9f9';
+                    input.style.cursor = 'not-allowed';
+                });
+                document.querySelector('.save-btn').style.display = 'none';
+                document.querySelector('.upload-label').style.display = 'none';
+                document.getElementById('logoUpload').disabled = true;
+            }
+
+            loadSavedLogo();
+        };
+
+        function loadSavedLogo() {
+            const savedLogo = localStorage.getItem("companyLogo");
+            if (savedLogo) {
+                document.getElementById('profilePreview').src = savedLogo;
+                document.getElementById('sidebarLogo').innerHTML = `<img src="${savedLogo}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const imageData = reader.result;
+                document.getElementById('profilePreview').src = imageData;
+                localStorage.setItem("companyLogo", imageData);
+                document.getElementById('sidebarLogo').innerHTML = `<img src="${imageData}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            };
+            if (event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
+        }
+
+        async function saveProfile() {
+            const newName = document.getElementById('editCompanyName').value;
+            const newPhone = document.getElementById('editPhone').value;
+            const email = document.getElementById('editEmail').value;
+
+            // Sync with backend
+            try {
+                const response = await authorizedFetch('/api/profile/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, name: newName, phone: newPhone })
+                });
+                
+                if (response.ok) {
+                    localStorage.setItem("regCompany", newName);
+                    localStorage.setItem("registeredCompany", newName);
+                    localStorage.setItem("regPhone", newPhone);
+                    alert("Profile synchronized successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to update profile on server.");
+                }
+            } catch (err) {
+                alert("Server connection failed.");
+            }
+        }
+
+        (function applyTheme() {
+            if (localStorage.getItem("darkMode") === "enabled") document.body.classList.add("dark_theme");
+        })();
+    </script>
+</body>
+</html>

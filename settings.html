@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Civil Survey</title>
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <link rel="stylesheet" href="settings_style.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="mini-logo" id="sidebarLogo">CS</div>
+                <h3 id="sidebarCompanyName">Company</h3>
+            </div>
+            <nav class="menu">
+                <p class="menu-label">Main Menu</p>
+                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
+                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
+                <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
+                <a href="settings.html" class="menu-item active"><span>⚙️</span> Settings</a>
+                <a href="geo_map.html" class="menu-item"><span>📍</span> Geo Map</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h2>Application Settings</h2>
+            </header>
+
+            <div class="settings_wrapper">
+                <section class="settings_card">
+                    <h3>🎨 Appearance</h3>
+                    <div class="setting_row">
+                        <div class="setting_info">
+                            <span class="setting_title">Dark Mode</span>
+                            <span class="setting_desc">Adjust the interface for low-light environments.</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle" onclick="toggleDarkMode()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="settings_card">
+                    <h3>🖥️ System Information</h3>
+                    <div class="setting_row">
+                        <span>Version</span>
+                        <span class="value_text">v2.0.26 (Beta)</span>
+                    </div>
+                    <div class="setting_row">
+                        <span>Last Sync</span>
+                        <span class="value_text" id="lastSyncTime">Just now</span>
+                    </div>
+                </section>
+
+                <section class="settings_card danger_zone">
+                    <h3>⚠️ Account Actions</h3>
+                    <div class="setting_row">
+                        <div class="setting_info">
+                            <span class="setting_title">Log Out</span>
+                            <span class="setting_desc">End your current session safely.</span>
+                        </div>
+                        <button class="logout_btn_large" onclick="handleLogout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Load Company Name
+            const name = localStorage.getItem("regCompany") || "Company";
+            document.getElementById('sidebarCompanyName').innerText = name;
+            
+            // Load Logo
+            const savedLogo = localStorage.getItem("companyLogo");
+            if (savedLogo) {
+                document.getElementById('sidebarLogo').innerHTML = `<img src="${savedLogo}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+
+            // Load Dark Mode Preference
+            if (localStorage.getItem("darkMode") === "enabled") {
+                document.body.classList.add("dark_theme");
+                document.getElementById("darkModeToggle").checked = true;
+            }
+        };
+        function toggleDarkMode() {
+            const isChecked = document.getElementById("darkModeToggle").checked;
+            
+            if (isChecked) {
+                document.body.classList.add("dark_theme");
+                localStorage.setItem("darkMode", "enabled");
+            } else {
+                document.body.classList.remove("dark_theme");
+                localStorage.setItem("darkMode", "disabled");
+            }
+        }
+        function handleLogout() {
+            if (confirm("Are you sure you want to logout from the Civil Survey Portal?")) {
+                window.location.href = "index.html";
+            }
+        }
+    </script>
+</body>
+</html>

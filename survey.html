@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Survey Records - Civix</title>
+    <script src="auth_guard.js"></script>
+    <!-- Excel Export Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <style>
+        .search-header {
+            background: white;
+            padding: 18px 22px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .search-header input {
+            padding: 12px 16px;
+            border: 1.5px solid #eee;
+            border-radius: 10px;
+            flex: 1;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .search-header input:focus {
+            outline: none;
+            border-color: #2d5a27;
+        }
+        .search-icon {
+            font-size: 18px;
+            color: #aaa;
+        }
+        .survey_list_container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .horizontal_box {
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr) auto; 
+            align-items: center;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+            border-left: 8px solid #2d5a27;
+            transition: all 0.3s ease;
+        }
+        .horizontal_box:hover {
+            transform: translateX(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+        .data_field {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #f0f0f0;
+            padding: 0 15px;
+        }
+        .data_field:nth-last-child(2) { border-right: none; }
+        .label_text {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #aaa;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .value_text {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .edit-badge {
+            background: #f1fcf1;
+            color: #27ae60;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid #27ae60;
+            transition: 0.3s;
+        }
+        .edit-badge:hover {
+            background: #27ae60;
+            color: white;
+        }
+
+        /* Token Modal Styles */
+        .token-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .token-modal {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .token-modal h3 { color: #2d5a27; margin-bottom: 20px; }
+        .token-form-group { margin-bottom: 15px; }
+        .token-form-group label { display: block; font-size: 11px; font-weight: 700; color: #888; margin-bottom: 5px; }
+        .token-form-group select, .token-form-group input { width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; }
+    </style>
+</head>
+<body style="background: #f8fbf8;">
+
+    <!-- Request Change Modal -->
+    <div class="token-modal-overlay" id="tokenModal">
+        <div class="token-modal">
+            <h3>🎫 Book Change Ticket</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Request the owner to update a specific field in this survey.</p>
+            <form id="tokenForm">
+                <input type="hidden" id="token_survey_id">
+                <div class="token-form-group">
+                    <label>FIELD TO CHANGE</label>
+                    <select id="token_field" onchange="updateOldValuePreview()">
+                        <option value="cli">Client Name</option>
+                        <option value="cliNum">Client Phone</option>
+                        <option value="loc">Location</option>
+                        <option value="size">Size</option>
+                        <option value="area">Area</option>
+                        <option value="instrument">Instrument</option>
+                        <option value="scaleFactor">Scale Factor</option>
+                        <option value="tempC">Temperature</option>
+                    </select>
+                </div>
+                <div class="token-form-group">
+                    <label>CURRENT VALUE</label>
+                    <input type="text" id="token_old_val" readonly style="background: #f9f9f9; color: #888;">
+                </div>
+                <div class="token-form-group">
+                    <label>NEW VALUE (REQUIRED)</label>
+                    <input type="text" id="token_new_val" placeholder="Enter the correct value" required>
+                </div>
+                <button type="submit" class="save-btn" style="width: 100%; background: #2d5a27; color: white;">Submit Ticket</button>
+                <button type="button" onclick="closeTokenModal()" style="width: 100%; background: #eee; color: #555; margin-top: 10px; border: none; padding: 12px; border-radius: 10px; cursor: pointer;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Audit History Modal -->
+    <div class="token-modal-overlay" id="historyModal">
+        <div class="token-modal" style="max-width: 600px;">
+            <h3>📜 Record History & Audit Log</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Timeline of approved changes for this survey record.</p>
+            <div id="historyList" style="max-height: 400px; overflow-y: auto;">
+                <p style="text-align:center; color:#888;">No history found for this record.</p>
+            </div>
+            <button type="button" onclick="closeHistoryModal()" style="width: 100%; background: #eee; color: #555; margin-top: 20px; border: none; padding: 12px; border-radius: 10px; cursor: pointer;">Close History</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="mini-logo" id="sidebarLogo" style="overflow:hidden">CS</div>
+                <h3 id="displayCompany">CIVIX</h3>
+            </div>
+            <nav class="menu">
+                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
+                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
+                <a href="survey.html" class="menu-item active"><span>📊</span> Survey Logs</a>
+                <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
+                <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
+                <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
+                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
+
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h2>Land & House Survey Records</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="exportToExcel()" class="save-btn" style="width: auto; padding: 12px 25px; background: #2ecc71; color:white; border:none; border-radius:10px; cursor:pointer;">📥 Export to Excel</button>
+                    <button onclick="location.href='survey_form.html'" class="save-btn" style="width: auto; padding: 12px 25px; background: var(--primary); color:white; border:none; border-radius:10px; cursor:pointer;">+ New Entry</button>
+                </div>
+            </header>
+
+            <div class="search-header">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchQuery" placeholder="Search by client, location, area, employee..." oninput="filterSurveys()">
+                <button onclick="resetFilters()" style="padding: 10px 16px; background: #eee; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; white-space: nowrap;">✕ Clear</button>
+            </div>
+
+            <div id="survey_display_area" class="survey_list_container">
+                <div style="text-align:center; padding:50px;">Loading your records...</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let allSurveys = [];
+        const userEmail = localStorage.getItem("regEmail");
+        const userRole = localStorage.getItem("userRole");
+
+        window.onload = async function() {
+            document.getElementById("displayCompany").innerText = localStorage.getItem("regCompany") || "CIVIX";
+            if (userRole === "Admin") {
+                document.getElementById("adminLink").style.display = "block";
+                if (document.getElementById("workerLink")) document.getElementById("workerLink").style.display = "block";
+                if (document.getElementById("ticketLink")) document.getElementById("ticketLink").style.display = "block";
+                if (document.getElementById("msgLink")) document.getElementById("msgLink").style.display = "block";
+            }
+            
+            loadSavedLogo();
+            await fetchSurveys();
+        };
+
+        function loadSavedLogo() {
+            const savedLogo = localStorage.getItem("companyLogo");
+            const sidebarLogoDiv = document.getElementById('sidebarLogo');
+            if (savedLogo && sidebarLogoDiv) {
+                sidebarLogoDiv.innerHTML = `<img src="${savedLogo}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+        }
+
+        async function fetchSurveys() {
+            const displayArea = document.getElementById('survey_display_area');
+            try {
+                const response = await authorizedFetch(`/api/surveys?email=${userEmail}`);
+                if (!response.ok) throw new Error('Failed to fetch');
+                allSurveys = await response.json();
+                displayData(allSurveys);
+            } catch (error) {
+                console.error(error);
+                displayArea.innerHTML = `<div style="text-align:center; padding:50px; color:red;">Connection to server failed.</div>`;
+            }
+        }
+
+        function displayData(data) {
+            const displayArea = document.getElementById('survey_display_area');
+            displayArea.innerHTML = "";
+            
+            if (data.length === 0) {
+                displayArea.innerHTML = `<div style="text-align:center; padding:50px; color:#aaa;">No matching records found.</div>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const box = document.createElement('div');
+                box.className = "horizontal_box";
+                
+                const fileHtml = item.filePath ? 
+                    `<div class="data_field">
+                        <span class="label_text">Received File</span>
+                        <a href="${item.filePath}" target="_blank" class="value_text" style="color:#2d5a27; text-decoration:underline;">Reach It 📄</a>
+                        <span style="font-size:9px; color:#999; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80px;">${item.fileName}</span>
+                    </div>` : 
+                    `<div class="data_field"><span class="label_text">Received File</span><span class="value_text" style="color:#ccc;">No File</span></div>`;
+
+                const editBtn = (userRole === 'Admin') ? 
+                    `<div class="data_field" style="border:none">
+                        <a onclick="editRecord('${item.id}')" class="edit-badge">Edit</a>
+                        <a onclick="showHistory(${item.id})" class="edit-badge" style="margin-left:5px; background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>
+                        <a onclick="exportSingleToExcel(${item.id})" class="edit-badge" style="margin-top:5px; background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
+                    </div>` : 
+                    `<div class="data_field" style="border:none">
+                        <a onclick="openTokenModal(${item.id})" class="edit-badge" style="background:#fff7e6; color:#d68910; border-color:#d68910;">🎫 Book Ticket</a>
+                        <a onclick="exportSingleToExcel(${item.id})" class="edit-badge" style="margin-top:5px; background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
+                    </div>`;
+
+                box.innerHTML = `
+                    <div class="data_field">
+                        <span class="label_text">Date & Time</span>
+                        <span class="value_text">${item.date}<br>${item.time}</span>
+                    </div>
+                    <div class="data_field">
+                        <span class="label_text">Client</span>
+                        <span class="value_text">${item.cli}</span>
+                        <a href="tel:${item.cliNum}" style="font-size:11px; color:#666; text-decoration:none;">📞 ${item.cliNum || 'No Num'}</a>
+                    </div>
+                    <div class="data_field">
+                        <span class="label_text">Location</span>
+                        <span class="value_text">${item.loc}</span>
+                        <span style="font-size:10px; color:#888; margin-top:5px;">${item.instrument || 'Total Station'}</span>
+                    </div>
+                    ${fileHtml}
+                    <div class="data_field">
+                        <span class="label_text">Size & SF</span>
+                        <span class="value_text">${item.size}</span>
+                        <span style="font-size:11px; color:#2d5a27;">SF: ${item.scaleFactor || '1.000'}</span>
+                    </div>
+                    <div class="data_field">
+                        <span class="label_text">Area & Temp</span>
+                        <span class="value_text">${item.area}</span>
+                        <span style="font-size:11px; color:#e67e22;">${item.tempC || '25'}°C</span>
+                    </div>
+                    ${editBtn}
+                `;
+                displayArea.appendChild(box);
+            });
+        }
+
+        function filterSurveys() {
+            const q = document.getElementById('searchQuery').value.toLowerCase().trim();
+            if (!q) { displayData(allSurveys); return; }
+
+            const filtered = allSurveys.filter(s =>
+                (s.cli  && s.cli.toLowerCase().includes(q))  ||
+                (s.loc  && s.loc.toLowerCase().includes(q))  ||
+                (s.area && s.area.toLowerCase().includes(q)) ||
+                (s.emp  && s.emp.toLowerCase().includes(q))  ||
+                (s.date && s.date.includes(q))
+            );
+
+            displayData(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchQuery').value = '';
+            displayData(allSurveys);
+        }
+
+        function editRecord(id) {
+            window.location.href = `survey_form.html?id=${id}`;
+        }
+
+        // --- EXCEL EXPORT LOGIC ---
+
+        function exportToExcel() {
+            if (allSurveys.length === 0) {
+                alert("No survey reports available to export.");
+                return;
+            }
+
+            // Map data for clean Excel export
+            const exportData = allSurveys.map(s => ({
+                "DATE": s.date,
+                "TIME": s.time,
+                "CLIENT NAME": s.cli,
+                "CLIENT MOBILE": s.cliNum,
+                "LOCATION": s.loc,
+                "AREA": s.area,
+                "SIZE": s.size,
+                "EMPLOYEE": s.emp,
+                "RECORDED BY": s.createdBy
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Survey Logs");
+            
+            // Name it with current timestamp
+            const filename = `Civix_Surveys_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        function exportSingleToExcel(id) {
+            const item = allSurveys.find(s => s.id == id);
+            if (!item) return;
+
+            const exportData = [{
+                "DATE": item.date,
+                "TIME": item.time,
+                "CLIENT NAME": item.cli,
+                "CLIENT MOBILE": item.cliNum,
+                "LOCATION": item.loc,
+                "AREA": item.area,
+                "SIZE": item.size,
+                "EMPLOYEE": item.emp,
+                "RECORDED BY": item.createdBy
+            }];
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Survey Record");
+            XLSX.writeFile(wb, `Survey_${item.cli || id}.xlsx`);
+        }
+
+        // --- TOKEN / CHANGE REQUEST LOGIC ---
+
+        function openTokenModal(id) {
+            const survey = allSurveys.find(s => s.id == id);
+            if(!survey) return;
+            document.getElementById('token_survey_id').value = id;
+            document.getElementById('token_new_val').value = "";
+            document.getElementById('tokenModal').style.display = 'flex';
+            updateOldValuePreview();
+        }
+
+        function closeTokenModal() {
+            document.getElementById('tokenModal').style.display = 'none';
+        }
+
+        function updateOldValuePreview() {
+            const id = document.getElementById('token_survey_id').value;
+            const field = document.getElementById('token_field').value;
+            const survey = allSurveys.find(s => s.id == id);
+            if (survey) {
+                document.getElementById('token_old_val').value = survey[field] || 'N/A';
+            }
+        }
+
+        document.getElementById('tokenForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerText = "Booking...";
+
+            const payload = {
+                surveyId: parseInt(document.getElementById('token_survey_id').value),
+                fieldName: document.getElementById('token_field').value,
+                oldValue: document.getElementById('token_old_val').value,
+                newValue: document.getElementById('token_new_val').value,
+                requestedBy: userEmail
+            };
+
+            try {
+                const res = await authorizedFetch('/api/tickets/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    alert("Ticket Booked! The owner will verify and update the records soon.");
+                    closeTokenModal();
+                } else {
+                    const err = await res.json();
+                    alert("Error: " + err.message);
+                }
+            } catch (err) {
+                alert("Failed to connect to server.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit Ticket";
+            }
+        });
+
+        async function showHistory(id) {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '<p style="text-align:center;">Loading audit trail...</p>';
+            document.getElementById('historyModal').style.display = 'flex';
+            
+            try {
+                const res = await authorizedFetch(`/api/tickets/history?surveyId=${id}`);
+                const history = await res.json();
+                
+                if (history.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">No approved changes recorded for this lot yet.</p>';
+                    return;
+                }
+                
+                list.innerHTML = history.map(h => `
+                    <div style="border-bottom:1px solid #eee; padding:15px 0;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <strong style="color:#2d5a27; font-size:12px;">Field: ${h.fieldName}</strong>
+                            <span style="font-size:10px; color:#aaa;">${new Date(h.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div style="font-size:13px; color:#666; margin-bottom:5px;">
+                            <span style="text-decoration:line-through; color:#e74c3c; opacity:0.6;">${h.oldValue}</span> ➡️ 
+                            <span style="color:#2ecc71; font-weight:700;">${h.newValue}</span>
+                        </div>
+                        <p style="font-size:10px; color:#999; margin:0;">Requested by: ${h.requestedBy}</p>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                list.innerHTML = '<p style="text-align:center; color:#e74c3c;">Failed to load history.</p>';
+            }
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        (function applyTheme() {
+            if (localStorage.getItem("darkMode") === "enabled") document.body.classList.add("dark_theme");
+        })();
+    </script>
+</body>
+</html>
