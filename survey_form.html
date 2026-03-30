@@ -199,23 +199,7 @@
                 <label class="field-label">Area Name</label>
                 <input type="text" id="area" placeholder="Town / area / zone" required>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <div>
-                        <label class="field-label">Instrument Used</label>
-                        <input type="text" id="instrument" placeholder="e.g., Total Station, GPS" value="Total Station">
-                    </div>
-                    <div>
-                        <label class="field-label">Scale Factor</label>
-                        <input type="text" id="scaleFactor" placeholder="e.g., 0.9999" value="1.0000">
-                    </div>
-                </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                    <div>
-                        <label class="field-label">Temp (°C)</label>
-                        <input type="text" id="tempC" placeholder="e.g., 32" value="25">
-                    </div>
-                </div>
 
                 <!-- Date: shown for Old Survey mode; hidden for New -->
                 <div class="date-field-row" id="dateFieldRow">
@@ -301,9 +285,6 @@
                         document.getElementById('client_num').value  = data.cliNum || '';
                         document.getElementById('area').value        = data.area   || '';
                         document.getElementById('survey_date').value = data.date   || '';
-                        document.getElementById('instrument').value  = data.instrument || 'Total Station';
-                        document.getElementById('scaleFactor').value = data.scaleFactor || '1.0000';
-                        document.getElementById('tempC').value       = data.tempC || '25';
                     }
                 } catch (err) {
                     console.error('Error fetching survey for edit:', err);
@@ -341,9 +322,6 @@
             formData.append('cli',       document.getElementById('client').value);
             formData.append('cliNum',    document.getElementById('client_num').value);
             formData.append('area',      document.getElementById('area').value);
-            formData.append('instrument', document.getElementById('instrument').value);
-            formData.append('scaleFactor', document.getElementById('scaleFactor').value);
-            formData.append('tempC',       document.getElementById('tempC').value);
             formData.append('date',      finalDate);
             formData.append('time',      finalTime);
             formData.append('createdBy', userEmail);

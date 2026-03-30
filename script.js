@@ -83,9 +83,9 @@ document.getElementById("mainForm").addEventListener("submit", async function(e)
         } catch (signInError) {
             console.log("Sign-in failed, checking if registration is needed:", signInError.code);
             
-            // Allow registration if Owner mode and user doesn't exist yet
-            if (authMode === 'owner' && (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential')) {
-                console.log("Trying to register new Owner...");
+            // Allow registration for both Owners (first user) and Employees (creates Pending request)
+            if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential') {
+                console.log("Trying to register new user...");
                 userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 console.log("Firebase Registration Successful");
             } else {

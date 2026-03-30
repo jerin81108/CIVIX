@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Registration - Civix</title>
+    <script src="auth_guard.js"></script>
     <link rel="stylesheet" href="home_style.css">
     <link rel="stylesheet" href="style.css">
     <style>
@@ -23,6 +24,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             font-family: inherit;
+            color: #000;
         }
         .reg-card button {
             width: 100%;
@@ -44,11 +46,16 @@
         <p style="color: #666; margin-bottom: 20px;">Register a new employee. They will be able to log in immediately after you create their ID.</p>
         
         <form id="empRegForm">
-            <input type="text" id="empName" placeholder="Full Name" required>
-            <input type="email" id="empEmail" placeholder="Email Address" required>
-            <input type="password" id="empPass" placeholder="Initial Password" required>
+            <label style="display: block; margin-top: 10px; font-size: 14px; color: #555; font-weight: 600;">Employee Full Name:</label>
+            <input type="text" id="empName" placeholder="e.g. John Doe" required>
             
-            <label style="display: block; margin-top: 15px; font-size: 14px; color: #555;">Select Role:</label>
+            <label style="display: block; margin-top: 10px; font-size: 14px; color: #555; font-weight: 600;">Login Email Address:</label>
+            <input type="email" id="empEmail" placeholder="e.g. name@company.com" required>
+            
+            <label style="display: block; margin-top: 10px; font-size: 14px; color: #555; font-weight: 600;">Temporary Account Password:</label>
+            <input type="password" id="empPass" placeholder="Enter an initial password (min 6 chars)" required>
+            
+            <label style="display: block; margin-top: 15px; font-size: 14px; color: #555; font-weight: 600;">Assign System Role:</label>
             <select id="empRole">
                 <option value="User/Creator">User/Creator (Can Upload & See Own Data)</option>
                 <option value="Worker">Worker (Can only View All Data)</option>
@@ -56,7 +63,7 @@
 
             <button type="submit">Create Employee ID</button>
         </form>
-        <a href="admin.html" class="back-link">← Back to Admin Dashboard</a>
+        <a href="workers.html" class="back-link">← Back to Employee Directory</a>
     </div>
 
     <script>
@@ -69,7 +76,7 @@
             const role = document.getElementById('empRole').value;
 
             try {
-                const response = await fetch('/api/admin/users/create', {
+                const response = await authorizedFetch('/api/admin/users/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ adminEmail, name, email, password, role })
@@ -77,7 +84,7 @@
 
                 if (response.ok) {
                     alert('Employee account created successfully!');
-                    window.location.href = "admin.html";
+                    window.location.href = "workers.html";
                 } else {
                     const data = await response.json();
                     alert('Error: ' + data.message);

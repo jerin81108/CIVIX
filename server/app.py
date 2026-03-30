@@ -119,6 +119,10 @@ def init_db():
         cursor.execute("ALTER TABLE surveys ADD COLUMN scaleFactor TEXT DEFAULT '1.0000'")
     if 'tempC' not in existing_cols:
         cursor.execute("ALTER TABLE surveys ADD COLUMN tempC TEXT DEFAULT '25'")
+    if 'fileName' not in existing_cols:
+        cursor.execute("ALTER TABLE surveys ADD COLUMN fileName TEXT")
+    if 'filePath' not in existing_cols:
+        cursor.execute("ALTER TABLE surveys ADD COLUMN filePath TEXT")
     
     conn.commit()
     print("Migration: Updated surveys table with technical columns.")
@@ -133,11 +137,29 @@ init_db()
 try:
     adminsdk_path = os.path.join(os.path.dirname(__file__), 'firebase-adminsdk.json')
     if os.path.exists(adminsdk_path):
+        # Local development: use JSON file
         cred = credentials.Certificate(adminsdk_path)
         firebase_admin.initialize_app(cred)
-        print("Firebase Admin SDK initialized successfully.")
+        print("Firebase Admin SDK initialized from JSON file.")
+    elif os.environ.get('FIREBASE_PROJECT_ID'):
+        # Production (Render): use environment variables
+        private_key = os.environ.get('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n')
+        cred = credentials.Certificate({
+            "type": "service_account",
+            "project_id": os.environ.get('FIREBASE_PROJECT_ID'),
+            "private_key_id": os.environ.get('FIREBASE_PRIVATE_KEY_ID'),
+            "private_key": private_key,
+            "client_email": os.environ.get('FIREBASE_CLIENT_EMAIL'),
+            "client_id": os.environ.get('FIREBASE_CLIENT_ID'),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{os.environ.get('FIREBASE_CLIENT_EMAIL')}"
+        })
+        firebase_admin.initialize_app(cred)
+        print("Firebase Admin SDK initialized from environment variables.")
     else:
-        print("CRITICAL: 'server/firebase-adminsdk.json' is MISSING.")
+        print("CRITICAL: No Firebase credentials found (no JSON file or env vars).")
 except Exception as e:
     print(f"ERROR: Firebase Admin SDK failed to initialize: {e}")
 
@@ -405,9 +427,9 @@ def add_survey():
         conn = get_db_connection()
         user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
         
-        if not user or user['role'] == 'Worker':
+        if not user:
              conn.close()
-             return jsonify({"message": "Workers cannot upload data."}), 403
+             return jsonify({"message": "User not found."}), 403
              
         if user['status'] != 'Approved':
             conn.close()
@@ -642,26 +664,63 @@ def delete_user():
 @require_auth
 def create_ticket():
     try:
-        data = request.json
+        if request.content_type and request.content_type.startswith('multipart/form-data'):
+            data = request.form
+            file = request.files.get('file')
+        else:
+            data = request.json
+            file = None
+
         survey_id = data.get('surveyId')
-        field_name = data.get('fieldName')
-        old_value = data.get('oldValue')
-        new_value = data.get('newValue')
         requested_by = data.get('requestedBy')
         
-        if not survey_id or not field_name:
+        changes_json = data.get('changes')
+        if changes_json:
+            changes = json.loads(changes_json)
+        else:
+            changes = [{
+                "fieldName": data.get('fieldName'),
+                "oldValue": data.get('oldValue'),
+                "newValue": data.get('newValue')
+            }] if data.get('fieldName') else []
+
+        if not survey_id or (not changes and not file):
             return jsonify({"message": "Incomplete request"}), 400
             
         now = datetime.utcnow().isoformat()
         conn = get_db_connection()
-        conn.execute('''
-            INSERT INTO change_requests (surveyId, fieldName, oldValue, newValue, requestedBy, createdAt)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (survey_id, field_name, old_value, new_value, requested_by, now))
+        
+        for change in changes:
+            if not change.get('fieldName'):
+                continue
+            conn.execute('''
+                INSERT INTO change_requests (surveyId, fieldName, oldValue, newValue, requestedBy, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (survey_id, change['fieldName'], change.get('oldValue'), change.get('newValue'), requested_by, now))
+
+        file_msg = ""
+        if file:
+            from werkzeug.utils import secure_filename
+            file_name = secure_filename(file.filename)
+            upload_folder = os.path.join(ROOT_DIR, 'uploads')
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+            
+            unique_filename = f"ticket_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{file_name}"
+            file_path = f"/uploads/{unique_filename}"
+            file.save(os.path.join(upload_folder, unique_filename))
+            
+            conn.execute('''
+                INSERT INTO change_requests (surveyId, fieldName, oldValue, newValue, requestedBy, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (survey_id, "file", "Existing Document", json.dumps({"fileName": file_name, "filePath": file_path}), requested_by, now))
+            file_msg = " and file upload"
+
         conn.commit()
         conn.close()
-        return jsonify({"message": f"Ticket #{survey_id} submitted to owner for approval"}), 201
+        return jsonify({"message": f"Change request(s){file_msg} submitted for approval"}), 201
     except Exception as e:
+        print(f"Error creating ticket: {e}")
         return jsonify({"message": str(e)}), 500
 
 @app.route('/api/tickets/all', methods=['GET'])
@@ -716,12 +775,21 @@ def approve_ticket():
         new_val = ticket['newValue']
         
         # Security: whitelist allowed fields to prevent SQL injection or accidents
-        allowed_fields = ['size', 'loc', 'emp', 'cli', 'cliNum', 'area', 'instrument', 'scaleFactor', 'tempC', 'date', 'time']
+        allowed_fields = ['size', 'loc', 'emp', 'cli', 'cliNum', 'area', 'instrument', 'scaleFactor', 'tempC', 'date', 'time', 'file']
         if field not in allowed_fields:
             conn.close()
             return jsonify({"message": "Field modification restricted"}), 403
             
-        conn.execute(f'UPDATE surveys SET {field} = ? WHERE id = ?', (new_val, survey_id))
+        if field == 'file':
+            try:
+                file_info = json.loads(new_val)
+                file_name = file_info.get('fileName')
+                file_path = file_info.get('filePath')
+                conn.execute('UPDATE surveys SET fileName = ?, filePath = ? WHERE id = ?', (file_name, file_path, survey_id))
+            except Exception as jerr:
+                print(f"Error parsing file JSON: {jerr}")
+        else:
+            conn.execute(f'UPDATE surveys SET {field} = ? WHERE id = ?', (new_val, survey_id))
         
         # 3. Mark Ticket as Approved
         conn.execute('UPDATE change_requests SET status = "Approved" WHERE id = ?', (ticket_id,))

@@ -119,34 +119,49 @@
 
     <!-- Request Change Modal -->
     <div class="token-modal-overlay" id="tokenModal">
-        <div class="token-modal">
+        <div class="token-modal" style="max-width: 600px; width: 95%;">
             <h3>🎫 Book Change Ticket</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Request the owner to update a specific field in this survey.</p>
+            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Request the owner to update specific fields in this survey. You can change multiple items simultaneously or attach a file.</p>
             <form id="tokenForm">
                 <input type="hidden" id="token_survey_id">
-                <div class="token-form-group">
-                    <label>FIELD TO CHANGE</label>
-                    <select id="token_field" onchange="updateOldValuePreview()">
-                        <option value="cli">Client Name</option>
-                        <option value="cliNum">Client Phone</option>
-                        <option value="loc">Location</option>
-                        <option value="size">Size</option>
-                        <option value="area">Area</option>
-                        <option value="instrument">Instrument</option>
-                        <option value="scaleFactor">Scale Factor</option>
-                        <option value="tempC">Temperature</option>
-                    </select>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="token-form-group">
+                        <label>CLIENT NAME</label>
+                        <input type="text" id="token_cli">
+                        <input type="hidden" id="token_old_cli">
+                    </div>
+                    <div class="token-form-group">
+                        <label>CLIENT PHONE</label>
+                        <input type="text" id="token_cliNum">
+                        <input type="hidden" id="token_old_cliNum">
+                    </div>
+                    <div class="token-form-group">
+                        <label>LOCATION</label>
+                        <input type="text" id="token_loc">
+                        <input type="hidden" id="token_old_loc">
+                    </div>
+                    <div class="token-form-group">
+                        <label>SIZE</label>
+                        <input type="text" id="token_size">
+                        <input type="hidden" id="token_old_size">
+                    </div>
+                    <div class="token-form-group">
+                        <label>AREA</label>
+                        <input type="text" id="token_area">
+                        <input type="hidden" id="token_old_area">
+                    </div>
                 </div>
-                <div class="token-form-group">
-                    <label>CURRENT VALUE</label>
-                    <input type="text" id="token_old_val" readonly style="background: #f9f9f9; color: #888;">
+
+                <div class="token-form-group" style="margin-bottom: 20px;">
+                    <label>ATTACH NEW FILE (OPTIONAL)</label>
+                    <input type="file" id="token_file" style="padding: 9px; cursor: pointer; background: #fafafa;">
                 </div>
-                <div class="token-form-group">
-                    <label>NEW VALUE (REQUIRED)</label>
-                    <input type="text" id="token_new_val" placeholder="Enter the correct value" required>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="save-btn" style="flex: 1; background: #2d5a27; color: white;">Submit Ticket</button>
+                    <button type="button" onclick="closeTokenModal()" style="flex: 1; background: #eee; color: #555; border: none; padding: 12px; border-radius: 10px; cursor: pointer;">Cancel</button>
                 </div>
-                <button type="submit" class="save-btn" style="width: 100%; background: #2d5a27; color: white;">Submit Ticket</button>
-                <button type="button" onclick="closeTokenModal()" style="width: 100%; background: #eee; color: #555; margin-top: 10px; border: none; padding: 12px; border-radius: 10px; cursor: pointer;">Cancel</button>
             </form>
         </div>
     </div>
@@ -290,18 +305,15 @@
                     <div class="data_field">
                         <span class="label_text">Location</span>
                         <span class="value_text">${item.loc}</span>
-                        <span style="font-size:10px; color:#888; margin-top:5px;">${item.instrument || 'Total Station'}</span>
                     </div>
                     ${fileHtml}
                     <div class="data_field">
-                        <span class="label_text">Size & SF</span>
+                        <span class="label_text">Size</span>
                         <span class="value_text">${item.size}</span>
-                        <span style="font-size:11px; color:#2d5a27;">SF: ${item.scaleFactor || '1.000'}</span>
                     </div>
                     <div class="data_field">
-                        <span class="label_text">Area & Temp</span>
+                        <span class="label_text">Area</span>
                         <span class="value_text">${item.area}</span>
-                        <span style="font-size:11px; color:#e67e22;">${item.tempC || '25'}°C</span>
                     </div>
                     ${editBtn}
                 `;
@@ -391,22 +403,19 @@
             const survey = allSurveys.find(s => s.id == id);
             if(!survey) return;
             document.getElementById('token_survey_id').value = id;
-            document.getElementById('token_new_val').value = "";
+            
+            const fields = ['cli', 'cliNum', 'loc', 'size', 'area'];
+            fields.forEach(f => {
+                document.getElementById('token_' + f).value = survey[f] || '';
+                document.getElementById('token_old_' + f).value = survey[f] || '';
+            });
+            
+            document.getElementById('token_file').value = "";
             document.getElementById('tokenModal').style.display = 'flex';
-            updateOldValuePreview();
         }
 
         function closeTokenModal() {
             document.getElementById('tokenModal').style.display = 'none';
-        }
-
-        function updateOldValuePreview() {
-            const id = document.getElementById('token_survey_id').value;
-            const field = document.getElementById('token_field').value;
-            const survey = allSurveys.find(s => s.id == id);
-            if (survey) {
-                document.getElementById('token_old_val').value = survey[field] || 'N/A';
-            }
         }
 
         document.getElementById('tokenForm').addEventListener('submit', async function(e) {
@@ -415,19 +424,44 @@
             btn.disabled = true;
             btn.innerText = "Booking...";
 
-            const payload = {
-                surveyId: parseInt(document.getElementById('token_survey_id').value),
-                fieldName: document.getElementById('token_field').value,
-                oldValue: document.getElementById('token_old_val').value,
-                newValue: document.getElementById('token_new_val').value,
-                requestedBy: userEmail
-            };
+            const id = document.getElementById('token_survey_id').value;
+            const changes = [];
+            
+            const fields = ['cli', 'cliNum', 'loc', 'size', 'area'];
+            fields.forEach(f => {
+                const newVal = document.getElementById('token_' + f).value;
+                const oldVal = document.getElementById('token_old_' + f).value;
+                if (newVal !== oldVal) {
+                    changes.push({
+                        fieldName: f,
+                        oldValue: oldVal || 'N/A',
+                        newValue: newVal
+                    });
+                }
+            });
+
+            const fileInput = document.getElementById('token_file');
+            const file = fileInput.files[0];
+            
+            if (changes.length === 0 && !file) {
+                alert("No changes detected.");
+                btn.disabled = false;
+                btn.innerText = "Submit Ticket";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('surveyId', id);
+            formData.append('requestedBy', userEmail);
+            formData.append('changes', JSON.stringify(changes));
+            if (file) {
+                formData.append('file', file);
+            }
 
             try {
                 const res = await authorizedFetch('/api/tickets/create', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
                 
                 if (res.ok) {

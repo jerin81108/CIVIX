@@ -84,10 +84,18 @@
                         loc: 'Location',
                         size: 'Size',
                         area: 'Area',
-                        instrument: 'Instrument',
-                        scaleFactor: 'Scale Factor',
-                        tempC: 'Temperature'
+                        file: 'Attached File'
                     };
+
+                    let oldValHtml = `Was: ${t.oldValue}`;
+                    let newValHtml = `Change to: ${t.newValue}`;
+
+                    if (t.fieldName === 'file') {
+                        try {
+                            const info = JSON.parse(t.newValue);
+                            newValHtml = `New File: <a href="${info.filePath}" target="_blank" style="color:#2ecc71; text-decoration:underline;">${info.fileName}</a>`;
+                        } catch(e) {}
+                    }
 
                     card.innerHTML = `
                         <div class="ticket-header">
@@ -104,8 +112,8 @@
                             <div class="diff-box">
                                 <span style="font-size:10px; color:#888; font-weight:700;">PROPOSED CHANGE ON: ${fieldLabels[t.fieldName] || t.fieldName}</span>
                                 <div style="margin-top:10px;">
-                                    <span class="old-val">Was: ${t.oldValue}</span>
-                                    <span class="new-val">Change to: ${t.newValue}</span>
+                                    <span class="old-val">${oldValHtml}</span>
+                                    <span class="new-val">${newValHtml}</span>
                                 </div>
                             </div>
                             <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
