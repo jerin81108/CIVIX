@@ -10,11 +10,16 @@
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const status = localStorage.getItem('userStatus') || localStorage.getItem('status');
 
-    // 2. Not logged in → Send to landing page
+    const PUBLIC_PAGES = ['index.html', 'contact.html', 'about.html'];
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    // 2. Not logged in → Send to landing page if trying to access internal content
     if (!email || isLoggedIn !== 'true') {
-        console.warn("🔐 Forbidden: Unauthorized access. Redirecting...");
-        window.location.replace('index.html');
-        return;
+        if (!PUBLIC_PAGES.includes(currentPage)) {
+            console.warn("🔐 Forbidden: Unauthorized access. Redirecting to Public Portal...");
+            window.location.replace('index.html');
+            return;
+        }
     }
 
     // 3. Logged in but Pending → Send to pending page

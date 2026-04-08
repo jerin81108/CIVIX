@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Survey Records</title>
+    <title>Survey Records - B.K Builders</title>
     <script src="auth_guard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="home_style.css">
@@ -109,7 +109,7 @@
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Logs");
-            XLSX.writeFile(wb, "Civix_Survey_Log.xlsx");
+            XLSX.writeFile(wb, "BK_Builders_Survey_Log.xlsx");
         }
     </script>
 </body>

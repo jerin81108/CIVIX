@@ -25,6 +25,7 @@
                 <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
                 <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
                 <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
                 <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
                 <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
                 <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
@@ -78,6 +79,17 @@
                 </div>
             </section>
                 <section class="dashboard_grid">
+                    <div class="card survey-card-premium" onclick="document.getElementById('factoryPlanModal').style.display='block'" style="cursor: pointer; border-left: 4px solid #f1c40f; transition: transform 0.3s; background: rgba(255, 255, 255, 0.05);">
+                        <div class="card_icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                        </div>
+                        <div class="card_info">
+                            <span class="label">Blueprint Viewer</span>
+                            <h2>I.F. Plan</h2>
+                            <p style="font-size: 11px; color: #f1c40f; font-weight: bold;">Click to expand Topo Sketches</p>
+                        </div>
+                    </div>
+
                     <div class="card survey-card-premium">
                         <div class="card_icon">
                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2d5a27" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
@@ -168,7 +180,7 @@
                         <p id="civil_fact" class="fact_text" style="background: rgba(45, 90, 39, 0.05); padding: 12px 20px; border-radius: 12px; border-left: 4px solid #f1c40f;">Loading civil engineering fact...</p>
                     </div>
                     
-                    <div class="weather_widget tech-widget" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d5a27 100%); color: white; padding: 20px; border-radius: 22px; width: 220px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+                    <div class="weather_widget tech-widget" style="background: linear-gradient(135deg, #3498db 0%, #1a5276 100%); color: white; padding: 20px; border-radius: 22px; width: 220px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(52, 152, 219, 0.4); border: 2px solid #5dade2;">
                         <div id="weather_icon" style="font-size: 30px; margin-bottom: 5px;">🛰️</div>
                         <div class="weather_info">
                             <h2 id="temp_display" style="margin: 0; font-size: 1.8rem;">28°C</h2>
@@ -182,6 +194,20 @@
                 </section>
             </section>
         </main>
+    </div>
+
+    <!-- Factory Plan Modal -->
+    <div id="factoryPlanModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px);">
+        <button onclick="document.getElementById('factoryPlanModal').style.display='none'" style="position: absolute; top: 20px; left: 20px; color: #f1f1f1; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);" onmouseover="this.style.background='rgba(241,196,15,0.2)'; this.style.borderColor='#f1c40f'; this.style.color='#f1c40f';" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.2)'; this.style.color='#f1f1f1';">
+            <span>←</span> Back
+        </button>
+        <span onclick="document.getElementById('factoryPlanModal').style.display='none'" style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001;">&times;</span>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; padding: 60px 20px 60px 20px; gap: 30px;">
+            <img src="factory plan.jpeg" style="max-width: 95%; max-height: 90vh; border: 3px solid #f1c40f; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain;">
+            <img src="factory plan1.jpeg" style="max-width: 95%; max-height: 90vh; border: 3px solid #f1c40f; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain;">
+            <div style="color: white; margin-top: 5px; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">M/s. SRI ROYAL DESIGN - TOPO SKETCH PLANS</div>
+            <button onclick="document.getElementById('factoryPlanModal').style.display='none'" style="margin-top: 20px; background: transparent; border: 2px solid #f1c40f; color: #f1c40f; padding: 12px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: inherit; letter-spacing: 1px;" onmouseover="this.style.background='#f1c40f'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#f1c40f';">← Back to Dashboard</button>
+        </div>
     </div>
 
     <script>
@@ -314,7 +340,7 @@
 
             const quotes = [
                 { q: "Engineering is the art of directing power in nature.", a: "Thomas Tredgold" },
-                { q: "Precision is not an option, it is the standard.", a: "Civix Team" }
+                { q: "Precision is not an option, it is the standard.", a: "B.K Builders Team" }
             ];
             const q = quotes[Math.floor(Math.random() * quotes.length)];
             document.getElementById('engineers_quote').innerText = `"${q.q}"`;

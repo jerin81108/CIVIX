@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Change Requests (Tickets) - Civix</title>
+    <title>Change Requests (Tickets) - B.K Builders</title>
     <script src="auth_guard.js"></script>
     <link rel="stylesheet" href="home_style.css">
     <style>
@@ -25,12 +25,12 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="mini-logo" id="sidebarLogo" style="overflow:hidden">CS</div>
-                <h3 id="displayCompany">CIVIX</h3>
+                <h3 id="displayCompany">B.K Builders</h3>
             </div>
             <nav class="menu">
                 <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
                 <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
-                <a href="messages.html" class="menu-item"><span>✉️</span> Guest Messages</a>
+                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
                 <a href="tickets.html" class="menu-item active"><span>🎫</span> Change Requests</a>
                 <a href="workers.html" class="menu-item"><span>👥</span> Employee Directory</a>
                 <a href="admin.html" class="menu-item"><span>✔️</span> Approvals</a>
@@ -128,7 +128,7 @@
                 });
                 
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('displayCompany').innerText = localStorage.getItem("regCompany") || "CIVIX";
+                document.getElementById('displayCompany').innerText = localStorage.getItem("regCompany") || "B.K Builders";
                 loadSavedLogo();
             } catch (err) {
                 console.error(err);

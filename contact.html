@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquiry & Contact - B.K. Builders</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary: #f1c40f;
+            --bg-dark: #020617;
+            --glass: rgba(15, 23, 42, 0.6);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; min-height: 100vh;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* --- Global Technical Frame --- */
+        .technical-frame {
+            position: fixed;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 1px solid rgba(241, 196, 15, 0.2);
+            pointer-events: none;
+            z-index: 100;
+        }
+        .corner { position: absolute; width: 20px; height: 20px; border-color: var(--primary); border-style: solid; opacity: 0.5; }
+        .tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
+        .tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; }
+        .bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }
+        .br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 80px auto;
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-content {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header-content h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .header-content p {
+            color: var(--primary);
+            font-size: 1rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* --- Split Layout: Details & Form --- */
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .details-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 50px;
+        }
+
+        .details-panel h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+        }
+
+        .spec-item {
+            margin-bottom: 25px;
+        }
+
+        .spec-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .spec-item span {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* --- Inquiry Form --- */
+        .form-panel {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--primary);
+            border-radius: 40px;
+            padding: 50px;
+            box-shadow: 0 0 50px rgba(241, 196, 15, 0.05);
+        }
+
+        .form-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 35px;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(241, 196, 15, 0.05);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 18px;
+            border-radius: 40px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.4s;
+            box-shadow: 0 10px 30px rgba(241, 196, 15, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(241, 196, 15, 0.5);
+        }
+
+        .back-home {
+            position: fixed;
+            top: 40px; left: 40px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 110;
+        }
+
+        .success-msg {
+            display: none;
+            text-align: center;
+            color: #2ecc71;
+            padding: 20px;
+            border: 1px solid #2ecc71;
+            border-radius: 12px;
+            margin-top: 20px;
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        @media (max-width: 900px) {
+            .split-layout { grid-template-columns: 1fr; }
+            .container { margin: 40px auto; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="technical-frame">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+    </div>
+
+    <div id="canvas-bg"></div>
+
+    <a href="index.html" class="back-home">← BACK TO PORTAL</a>
+
+    <div class="container">
+        <header class="header-content">
+            <h1>Expert Inquiry</h1>
+            <p>B.K. BUILDERS — Professional Architecture & Surveying</p>
+        </header>
+
+        <div class="split-layout">
+            <div class="details-panel">
+                <h2>Specializations</h2>
+                <div class="spec-item">
+                    <strong>I.F. Plan Mastery</strong>
+                    <span>Military-grade infrastructural framework layouts and boundary demarcations.</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Model Architecture</strong>
+                    <span>High-fidelity architectural modeling and government-approved structural drafting.</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Safety Compliance</strong>
+                    <span>Life-safety compliance mapping and high-visibility evacuation board designs.</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Licensed Status</strong>
+                    <span>Registered Building Surveyor (#067/T/LBS) with over 15 years of precision mastery.</span>
+                </div>
+            </div>
+
+            <div class="form-panel">
+                <h2>Direct Inquiry</h2>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone" placeholder="Enter phone number" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="Optional email">
+                    </div>
+                    <div class="form-group">
+                        <label>Your Inquiry</label>
+                        <textarea id="message" rows="4" placeholder="How can we help you?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">SEND MESSAGE</button>
+                    <div id="response" class="success-msg">Inquiry successfully sent. The owner has been notified.</div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Background Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, grid;
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 20);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-bg').appendChild(renderer.domElement);
+
+            grid = new THREE.GridHelper(100, 30, 0x1e293b, 0x0f172a);
+            grid.rotation.x = Math.PI / 10;
+            scene.add(grid);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            grid.rotation.y += 0.001;
+            renderer.render(scene, camera);
+        }
+
+        // Form Submission logic
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = 'SENDING...';
+            btn.disabled = true;
+
+            const data = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            try {
+                const res = await fetch('/api/public/callback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    document.getElementById('response').style.display = 'block';
+                    e.target.reset();
+                } else {
+                    alert('Submission failed. Please try again.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error. Please check your internet.');
+            } finally {
+                btn.innerText = 'SEND MESSAGE';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

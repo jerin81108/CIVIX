@@ -15,7 +15,7 @@ load_dotenv(env_path)
 
 # Define the root directory (where the HTML files are)
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DB_PATH = os.path.join(os.path.dirname(__file__), 'civix.db')
+DB_PATH = os.path.join(os.path.dirname(__file__), 'bk_builders.db')
 MESSAGES_DIR = os.path.join(os.path.dirname(__file__), 'messages')
 if not os.path.exists(MESSAGES_DIR):
     os.makedirs(MESSAGES_DIR)
@@ -104,6 +104,20 @@ def init_db():
         )
     ''')
     
+    # Create Payments Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            surveyId INTEGER UNIQUE,
+            quotationDate TEXT,
+            okDate TEXT,
+            receivedDate TEXT,
+            receivedOn TEXT,
+            createdAt TEXT,
+            createdBy TEXT
+        )
+    ''')
+
     conn.commit()
 
     # --- MIGRATIONS: add new columns to existing tables safely ---
@@ -819,6 +833,30 @@ def get_survey_history():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+@app.route('/api/public/callback', methods=['POST'])
+def submit_callback():
+    try:
+        data = request.json
+        name = data.get('name')
+        phone = data.get('phone')
+        email = data.get('email')
+        message = data.get('message')
+        
+        if not name or not phone:
+            return jsonify({"message": "Name and Phone are required"}), 400
+            
+        now = datetime.utcnow().isoformat()
+        conn = get_db_connection()
+        conn.execute('''
+            INSERT INTO callback_requests (name, phone, email, message, createdAt)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (name, phone, email, message, now))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Inquiry sent successfully. We will contact you soon."}), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+
 @app.route('/api/messages/all', methods=['GET'])
 @require_auth
 def get_all_messages():
@@ -908,6 +946,44 @@ def save_user():
         return jsonify({"message": "Public registration is disabled. Please contact the site owner."}), 403
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+
+@app.route('/api/payments', methods=['POST'])
+@require_auth
+def add_payment():
+    try:
+        data = request.json
+        survey_id = data.get('surveyId')
+        quotation_date = data.get('quotationDate')
+        ok_date = data.get('okDate')
+        received_date = data.get('receivedDate')
+        received_on = data.get('receivedOn')
+        email = request.email or data.get('createdBy')
+
+        if not all([survey_id, quotation_date, ok_date, received_date, received_on]):
+            return jsonify({"message": "All payment fields are required"}), 400
+
+        now = datetime.utcnow().isoformat()
+        conn = get_db_connection()
+        
+        existing = conn.execute('SELECT id FROM payments WHERE surveyId = ?', (survey_id,)).fetchone()
+        if existing:
+            conn.execute('''
+                UPDATE payments SET quotationDate=?, okDate=?, receivedDate=?, receivedOn=?
+                WHERE surveyId=?
+            ''', (quotation_date, ok_date, received_date, received_on, survey_id))
+        else:
+            conn.execute('''
+                INSERT INTO payments (surveyId, quotationDate, okDate, receivedDate, receivedOn, createdAt, createdBy)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (survey_id, quotation_date, ok_date, received_date, received_on, now, email))
+            
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"message": "Payment details saved successfully"}), 201
+    except Exception as e:
+        print(f"Error adding payment: {e}")
+        return jsonify({"message": str(e)}), 500
 
 @app.route('/<path:path>')
 def serve_static(path):

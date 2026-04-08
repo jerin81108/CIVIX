@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Survey Records - Civix</title>
+    <title>Survey Records - B.K Builders</title>
     <script src="auth_guard.js"></script>
     <!-- Excel Export Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -182,12 +182,13 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="mini-logo" id="sidebarLogo" style="overflow:hidden">CS</div>
-                <h3 id="displayCompany">CIVIX</h3>
+                <h3 id="displayCompany">B.K Builders</h3>
             </div>
             <nav class="menu">
                 <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
                 <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
                 <a href="survey.html" class="menu-item active"><span>📊</span> Survey Logs</a>
+                <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
                 <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
                 <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
                 <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
@@ -227,7 +228,7 @@
         const userRole = localStorage.getItem("userRole");
 
         window.onload = async function() {
-            document.getElementById("displayCompany").innerText = localStorage.getItem("regCompany") || "CIVIX";
+            document.getElementById("displayCompany").innerText = localStorage.getItem("regCompany") || "B.K Builders";
             if (userRole === "Admin") {
                 document.getElementById("adminLink").style.display = "block";
                 if (document.getElementById("workerLink")) document.getElementById("workerLink").style.display = "block";
@@ -371,7 +372,7 @@
             XLSX.utils.book_append_sheet(wb, ws, "Survey Logs");
             
             // Name it with current timestamp
-            const filename = `Civix_Surveys_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`;
+            const filename = `BK_Builders_Surveys_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`;
             XLSX.writeFile(wb, filename);
         }
 

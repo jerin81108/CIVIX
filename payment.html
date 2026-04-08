@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Details - Er. B. NANCY</title>
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <style>
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .form_wrapper {
+            max-width: 620px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+        .form_box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .form_box h2 {
+            margin: 0 0 22px;
+            font-size: 20px;
+            color: #1a3a17;
+        }
+        .field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 5px;
+            margin-top: 14px;
+        }
+        .form_box input[type="text"],
+        .form_box input[type="tel"],
+        .form_box input[type="date"],
+        .form_box select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 9px;
+            font-size: 14px;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            background: #fafafa;
+        }
+        .form_box input:focus, .form_box select:focus {
+            outline: none;
+            border-color: #2d5a27;
+            background: white;
+        }
+        .submit_btn {
+            width: 100%;
+            padding: 15px;
+            background: #2d5a27;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 22px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .submit_btn:hover { background: #1e3e1a; transform: translateY(-1px); }
+        .cancel_btn {
+            width: 100%;
+            padding: 13px;
+            background: #eee;
+            color: #555;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .cancel_btn:hover { background: #ddd; }
+    </style>
+</head>
+<body>
+    <div class="form_wrapper">
+        <div class="form_box">
+            <h2 id="formTitle">Enter Payment Details</h2>
+            <form id="paymentDataForm">
+
+                <label class="field-label">Linked Survey</label>
+                <select id="survey_id" required>
+                    <option value="" disabled selected>Loading surveys...</option>
+                </select>
+
+                <label class="field-label">Quotation Date</label>
+                <input type="date" id="quotation_date" required>
+
+                <label class="field-label">Ok Date</label>
+                <input type="date" id="ok_date" required>
+
+                <label class="field-label">Amount Received Date</label>
+                <input type="date" id="received_date" required>
+
+                <label class="field-label">Amount Received On</label>
+                <select id="received_on" required>
+                    <option value="" disabled selected>Select payment method</option>
+                    <option value="cash">Cash</option>
+                    <option value="cheque">Cheque's</option>
+                    <option value="rtgs">RTGS</option>
+                    <option value="gpay">GPay</option>
+                </select>
+
+                <button type="button" class="submit_btn" id="submitBtn" onclick="savePayment()">
+                    Save Payment
+                </button>
+                <button type="button" class="cancel_btn" onclick="window.history.back()">
+                    Cancel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function loadSurveys() {
+            try {
+                const userEmail = localStorage.getItem('regEmail');
+                const response = await authorizedFetch(`/api/surveys?email=${userEmail}`);
+                const selectElement = document.getElementById('survey_id');
+                
+                if (response.ok) {
+                    const surveys = await response.json();
+                    selectElement.innerHTML = '<option value="" disabled selected>Select a Survey to Link</option>';
+                    surveys.forEach(survey => {
+                        const option = document.createElement('option');
+                        option.value = survey.id;
+                        option.textContent = `${survey.cli || 'Unknown Client'} - ${survey.loc || 'Unknown Loc'} (${survey.date || ''})`;
+                        selectElement.appendChild(option);
+                    });
+                } else {
+                    selectElement.innerHTML = '<option value="" disabled selected>Failed to load surveys</option>';
+                }
+            } catch (error) {
+                console.error("Error loading surveys:", error);
+            }
+        }
+
+        async function savePayment() {
+            const sId = document.getElementById('survey_id').value;
+            const qDate = document.getElementById('quotation_date').value;
+            const oDate = document.getElementById('ok_date').value;
+            const rDate = document.getElementById('received_date').value;
+            const rOn = document.getElementById('received_on').value;
+            const userEmail = localStorage.getItem('regEmail');
+
+            if (!sId || !qDate || !oDate || !rDate || !rOn) {
+                alert("Please select a survey and fill in all required payment fields.");
+                return;
+            }
+
+            const payload = {
+                surveyId: sId,
+                quotationDate: qDate,
+                okDate: oDate,
+                receivedDate: rDate,
+                receivedOn: rOn,
+                createdBy: userEmail
+            };
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const response = await authorizedFetch('/api/payments', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    alert('✨ Payment details saved successfully!');
+                    window.location.href = 'home.html';
+                } else {
+                    const err = await response.json();
+                    alert('Failed to save payment: ' + (err.message || 'Unknown error'));
+                    btn.disabled = false;
+                    btn.textContent = 'Save Payment';
+                }
+            } catch (error) {
+                alert('Request failed: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = 'Save Payment';
+            }
+        }
+
+        window.onload = loadSurveys;
+
+        // Apply dark mode
+        (function() {
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark_theme');
+                const formBox = document.querySelector('.form_box');
+                if(formBox) {
+                    formBox.style.background = '#1a1a1a';
+                    formBox.style.color = 'white';
+                    const title = formBox.querySelector('h2');
+                    if(title) title.style.color = '#fff';
+                    const inputs = formBox.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        input.style.background = '#2c2c2c';
+                        input.style.color = '#fff';
+                        input.style.borderColor = '#444';
+                    });
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
