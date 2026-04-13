@@ -92,9 +92,8 @@
             <form id="paymentDataForm">
 
                 <label class="field-label">Linked Survey</label>
-                <select id="survey_id" required>
-                    <option value="" disabled selected>Loading surveys...</option>
-                </select>
+                <input type="text" id="survey_search" list="survey_suggestions" placeholder="Loading surveys..." autocomplete="off" required>
+                <datalist id="survey_suggestions"></datalist>
 
                 <label class="field-label">Quotation Date</label>
                 <input type="date" id="quotation_date" required>
@@ -125,23 +124,25 @@
     </div>
 
     <script>
+        let allLoadedSurveys = [];
         async function loadSurveys() {
             try {
                 const userEmail = localStorage.getItem('regEmail');
                 const response = await authorizedFetch(`/api/surveys?email=${userEmail}`);
-                const selectElement = document.getElementById('survey_id');
+                const dl = document.getElementById('survey_suggestions');
+                const inp = document.getElementById('survey_search');
                 
                 if (response.ok) {
-                    const surveys = await response.json();
-                    selectElement.innerHTML = '<option value="" disabled selected>Select a Survey to Link</option>';
-                    surveys.forEach(survey => {
+                    allLoadedSurveys = await response.json();
+                    dl.innerHTML = '';
+                    allLoadedSurveys.forEach(survey => {
                         const option = document.createElement('option');
-                        option.value = survey.id;
-                        option.textContent = `${survey.cli || 'Unknown Client'} - ${survey.loc || 'Unknown Loc'} (${survey.date || ''})`;
-                        selectElement.appendChild(option);
+                        option.value = `${survey.cli || 'Unknown Client'} - ${survey.loc || 'Unknown Loc'} (${survey.date || ''})`;
+                        dl.appendChild(option);
                     });
+                    inp.placeholder = "Type name or location to search...";
                 } else {
-                    selectElement.innerHTML = '<option value="" disabled selected>Failed to load surveys</option>';
+                    inp.placeholder = "Failed to load surveys";
                 }
             } catch (error) {
                 console.error("Error loading surveys:", error);
@@ -149,7 +150,10 @@
         }
 
         async function savePayment() {
-            const sId = document.getElementById('survey_id').value;
+            const searchValue = document.getElementById('survey_search').value;
+            const matchedSurvey = allLoadedSurveys.find(s => `${s.cli || 'Unknown Client'} - ${s.loc || 'Unknown Loc'} (${s.date || ''})` === searchValue);
+            const sId = matchedSurvey ? matchedSurvey.id : null;
+            
             const qDate = document.getElementById('quotation_date').value;
             const oDate = document.getElementById('ok_date').value;
             const rDate = document.getElementById('received_date').value;
@@ -157,7 +161,7 @@
             const userEmail = localStorage.getItem('regEmail');
 
             if (!sId || !qDate || !oDate || !rDate || !rOn) {
-                alert("Please select a survey and fill in all required payment fields.");
+                alert("Please select a valid survey from the suggestions and fill in all required payment fields.");
                 return;
             }
 

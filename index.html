@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Er. B. NANCY - Consulting Civil Engineer</title>
+    <meta name="description" content="Er. B. NANCY - Consulting Civil Engineer providing expert services in Factory Plans, Evacuation Mapping, Pollution Plans, Structural Estimations, and more.">
+    <meta name="keywords" content="Civil Engineer, Consulting, Factory Plan, Evacuation Mapping, Pollution Plan, Estimations, Building Models, Er B NANCY">
+    <meta name="robots" content="index, follow">
+    <meta name="google-site-verification" content="ADD_YOUR_VERIFICATION_CODE_HERE">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -324,14 +328,28 @@
 
     <script>
         const services = [
-            { id: 0, title: "I.F. Plan", desc: "Military-grade infrastructural framework layouts and boundary demarcations using RTK-GPS technology.", color: 0x3498db, pos: {x: -3, y: 0.5, z: 2} },
-            { id: 1, title: "Model Plan", desc: "Professional architectural and structural modeling, generating government-approved 3D blueprint prototypes.", color: 0xe67e22, pos: {x: 3, y: -0.5, z: 2} },
-            { id: 2, title: "Evacuation", desc: "Life-safety compliance mapping and high-visibility evacuation board designs for industrial complexes.", color: 0xe74c3c, pos: {x: -3, y: -0.5, z: -2} },
-            { id: 3, title: "Valuation", desc: "Expert property asset estimation and technical cost-valuation reports for financial and legal validation.", color: 0x2ecc71, pos: {x: 3, y: 0.5, z: -2} }
+            { id: 0, title: "Factory Plan", desc: "Expert drafting and Inspector of Factory plan submissions.", color: 0x3498db },
+            { id: 1, title: "Evacuation", desc: "High-visibility evacuation boards and life-safety compliance mapping.", color: 0xe74c3c },
+            { id: 2, title: "Pollution Plan", desc: "Environmental layouting and pollution control board plan submissions.", color: 0x2ecc71 },
+            { id: 3, title: "Fire Plan", desc: "Fire safety routing and life-safety compliance engineering.", color: 0xe67e22 },
+            { id: 4, title: "Home Plans", desc: "Panchayat-approved residential modeling & structural architecture.", color: 0x9b59b6 },
+            { id: 5, title: "Estimates", desc: "Accurate building estimation and structural costing analysis.", color: 0x1abc9c },
+            { id: 6, title: "Bank Loans", desc: "Certified bank loan reference reports for new constructions and renovations.", color: 0xf1c40f },
+            { id: 7, title: "Registrations", desc: "Official land registrations, demarcations, and legal documentation packages.", color: 0xecf0f1 }
         ];
 
+        services.forEach((s, idx) => {
+            const angle = (idx / services.length) * Math.PI * 2;
+            const radius = 5.5; // Circle radius logic
+            s.pos = {
+                x: Math.cos(angle) * radius,
+                y: Math.sin(angle * 2) * 1.2, // Wave height offset
+                z: Math.sin(angle) * radius
+            };
+        });
+
         let scene, camera, renderer, raycaster, mouse;
-        let house, pens = [], grid;
+        let house, pens = [], grid, pensGroup;
 
         init();
         animate();
@@ -387,28 +405,49 @@
             window.addEventListener('mousedown', onSelect);
         }
 
-        function createWireframeHouse() {
-            const houseGroup = new THREE.Group();
+        function buildDetailedHouse(accentColor, xPos) {
+            const group = new THREE.Group();
             
             // House Frame
-            const boxGeom = new THREE.BoxGeometry(4, 3, 4);
+            const boxGeom = new THREE.BoxGeometry(2.5, 2.2, 2.5);
             const edges = new THREE.EdgesGeometry(boxGeom);
             const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 }));
-            houseGroup.add(line);
+            group.add(line);
 
             // Roof
-            const roofGeom = new THREE.ConeGeometry(3.5, 2, 4);
+            const roofGeom = new THREE.ConeGeometry(2, 1.2, 4);
             const roofEdges = new THREE.EdgesGeometry(roofGeom);
-            const roofLine = new THREE.LineSegments(roofEdges, new THREE.LineBasicMaterial({ color: 0xf1c40f }));
-            roofLine.position.y = 2.5;
+            const roofLine = new THREE.LineSegments(roofEdges, new THREE.LineBasicMaterial({ color: accentColor }));
+            roofLine.position.y = 1.7;
             roofLine.rotation.y = Math.PI / 4;
-            houseGroup.add(roofLine);
+            group.add(roofLine);
+            
+            // Door Entryway
+            const doorGeom = new THREE.BoxGeometry(0.6, 1.0, 0.1);
+            const doorEdges = new THREE.EdgesGeometry(doorGeom);
+            const doorLine = new THREE.LineSegments(doorEdges, new THREE.LineBasicMaterial({ color: 0x2ecc71 }));
+            doorLine.position.set(0, -0.6, 1.25);
+            group.add(doorLine);
+            
+            group.position.x = xPos;
+            return group;
+        }
 
-            house = houseGroup;
+        function createWireframeHouse() {
+            house = new THREE.Group();
+            
+            const home1 = buildDetailedHouse(0xf1c40f, -1.8);
+            house.add(home1);
+            
+            const home2 = buildDetailedHouse(0x3498db, 1.8);
+            house.add(home2);
+            
             scene.add(house);
         }
 
         function createOrbitingPens() {
+            pensGroup = new THREE.Group();
+            
             services.forEach((s) => {
                 const penGroup = new THREE.Group();
                 
@@ -433,9 +472,9 @@
                 const ctx = canvas.getContext('2d');
                 ctx.fillStyle = 'rgba(0,0,0,0)';
                 ctx.fillRect(0,0,512,128);
-                ctx.font = 'bold 80px Outfit';
+                ctx.font = 'bold 60px Outfit'; // Scaled down text slightly to fit larger names
                 ctx.textAlign = 'center';
-                ctx.fillStyle = '#f1c40f';
+                ctx.fillStyle = '#f1c40f'; // primary color
                 ctx.fillText(s.title, 256, 90);
                 
                 const tex = new THREE.CanvasTexture(canvas);
@@ -450,8 +489,10 @@
                 penGroup.userData = s;
                 
                 pens.push(penGroup);
-                scene.add(penGroup);
+                pensGroup.add(penGroup);
             });
+            
+            scene.add(pensGroup);
         }
 
         function onSelect() {
@@ -474,7 +515,7 @@
             const cardImg = document.getElementById('cardImage');
             const cardImg2 = document.getElementById('cardImage2');
             
-            if (data.title === "I.F. Plan") {
+            if (data.title === "Factory Plan") {
                 cardImg.src = "factory plan.jpeg";
                 cardImg2.src = "factory plan1.jpeg";
                 imgContainer.style.display = "flex";
@@ -507,9 +548,13 @@
             requestAnimationFrame(animate);
             if (house) house.rotation.y += 0.005;
             
+            if (pensGroup) {
+                pensGroup.rotation.y += 0.002; // Elegant orbit
+            }
+            
             pens.forEach((p, i) => {
-                p.position.y += Math.sin(Date.now() * 0.002 + i) * 0.005;
-                p.rotation.z += 0.01;
+                p.position.y += Math.sin(Date.now() * 0.002 + i) * 0.005; // Bobbing
+                p.rotation.z += 0.01; // Spinning pen effect
             });
 
             if (grid) grid.rotation.y += 0.001;

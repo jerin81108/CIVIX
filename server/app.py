@@ -118,6 +118,18 @@ def init_db():
         )
     ''')
 
+    # Create Deleted Logs Table for Archival
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS deleted_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            originalSurveyId INTEGER,
+            deletedBy TEXT,
+            reason TEXT,
+            surveyData TEXT,
+            deletedAt TEXT
+        )
+    ''')
+
     conn.commit()
 
     # --- MIGRATIONS: add new columns to existing tables safely ---
@@ -531,6 +543,57 @@ def update_survey(id):
         return jsonify({"message": "Updated successfully"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+
+@app.route('/api/surveys/<id>', methods=['DELETE'])
+@require_auth
+def delete_survey(id):
+    try:
+        data = request.json
+        email = data.get('email')
+        password = data.get('password')
+        reason = data.get('reason')
+        
+        if not email or not password or not reason:
+            return jsonify({"message": "Missing required fields (email, password, reason)"}), 400
+            
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        
+        if not user:
+            conn.close()
+            return jsonify({"message": "User not found"}), 404
+            
+        if user['role'] != 'Admin':
+            conn.close()
+            return jsonify({"message": "Only the Owner/Admin can perform deletions."}), 403
+            
+        if user['password'] != password:
+            conn.close()
+            return jsonify({"message": "Invalid Administration password."}), 401
+            
+        survey = conn.execute('SELECT * FROM surveys WHERE id = ?', (id,)).fetchone()
+        if not survey:
+            conn.close()
+            return jsonify({"message": "Survey not found"}), 404
+            
+        now = datetime.utcnow().isoformat()
+        survey_json = json.dumps(row_to_dict(survey))
+        
+        # Log the deletion securely
+        conn.execute('''
+            INSERT INTO deleted_logs (originalSurveyId, deletedBy, reason, surveyData, deletedAt)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (survey['id'], email, reason, survey_json, now))
+        
+        # Execute Delete
+        conn.execute('DELETE FROM surveys WHERE id = ?', (id,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"message": "Record securely deleted and archived in logs."}), 200
+        
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 @app.route('/api/admin/users/pending', methods=['GET'])
 @require_auth

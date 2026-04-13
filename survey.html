@@ -178,6 +178,27 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="token-modal-overlay" id="deleteModal">
+        <div class="token-modal" style="max-width: 400px;">
+            <h3 style="color: #e74c3c;">⚠️ Secure Deletion</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">This action permanently removes the survey and securely archives its data. Valid authorization required.</p>
+            <input type="hidden" id="delete_survey_id">
+            <div class="token-form-group">
+                <label style="color:#e74c3c;">REASON FOR DELETION (Required)</label>
+                <textarea id="delete_reason" rows="3" style="width: 100%; border: 1.5px solid #eee; border-radius: 10px; padding: 10px; font-family: inherit; font-size:13px;" required placeholder="Brief reason..."></textarea>
+            </div>
+            <div class="token-form-group" style="margin-top: 10px;">
+                <label style="color:#e74c3c;">MASTER PASSWORD (Required)</label>
+                <input type="password" id="delete_password" required placeholder="••••••••">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" id="deleteConfirmBtn" onclick="confirmDeletion()" style="flex: 1; background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition:0.3s;">Archive & Delete</button>
+                <button type="button" onclick="closeDeleteModal()" style="flex: 1; background: #eee; color: #555; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition:0.3s;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -205,6 +226,8 @@
             <header class="top-bar">
                 <h2>Land & House Survey Records</h2>
                 <div style="display: flex; gap: 10px;">
+                    <input type="file" id="importExcelFile" accept=".xlsx, .xls" style="display:none;" onchange="handleExcelImport(event)">
+                    <button onclick="document.getElementById('importExcelFile').click()" class="save-btn" style="width: auto; padding: 12px 25px; background: #3498db; color:white; border:none; border-radius:10px; cursor:pointer;">📤 Import from Excel</button>
                     <button onclick="exportToExcel()" class="save-btn" style="width: auto; padding: 12px 25px; background: #2ecc71; color:white; border:none; border-radius:10px; cursor:pointer;">📥 Export to Excel</button>
                     <button onclick="location.href='survey_form.html'" class="save-btn" style="width: auto; padding: 12px 25px; background: var(--primary); color:white; border:none; border-radius:10px; cursor:pointer;">+ New Entry</button>
                 </div>
@@ -287,6 +310,7 @@
                         <a onclick="editRecord('${item.id}')" class="edit-badge">Edit</a>
                         <a onclick="showHistory(${item.id})" class="edit-badge" style="margin-left:5px; background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>
                         <a onclick="exportSingleToExcel(${item.id})" class="edit-badge" style="margin-top:5px; background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
+                        <a onclick="initiateDelete(${item.id})" class="edit-badge" style="margin-top:5px; margin-left:5px; background:#fff0f0; color:#e74c3c; border-color:#e74c3c;">🗑️ Delete</a>
                     </div>` : 
                     `<div class="data_field" style="border:none">
                         <a onclick="openTokenModal(${item.id})" class="edit-badge" style="background:#fff7e6; color:#d68910; border-color:#d68910;">🎫 Book Ticket</a>
@@ -515,6 +539,124 @@
 
         function closeHistoryModal() {
             document.getElementById('historyModal').style.display = 'none';
+        }
+
+        // --- DELETION LOGIC ---
+        function initiateDelete(id) {
+            document.getElementById('delete_survey_id').value = id;
+            document.getElementById('delete_reason').value = '';
+            document.getElementById('delete_password').value = '';
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        async function confirmDeletion() {
+            const id = document.getElementById('delete_survey_id').value;
+            const reason = document.getElementById('delete_reason').value.trim();
+            const password = document.getElementById('delete_password').value;
+            
+            if (!reason || !password) {
+                alert("Both Reason and Password are required to authorize secure deletion.");
+                return;
+            }
+            
+            const btn = document.getElementById('deleteConfirmBtn');
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            try {
+                const res = await window.authorizedFetch(`/api/surveys/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, password: password, reason: reason })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert('Record successfully deleted and backed up in logs.');
+                    closeDeleteModal();
+                    await fetchSurveys();
+                } else {
+                    alert('Deletion Denied: ' + data.message);
+                }
+            } catch(e) {
+                alert('Connection error during deletion: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Archive & Delete";
+            }
+        }
+
+        async function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (!jsonRows || jsonRows.length === 0) {
+                        alert("Excel file is empty or invalid format.");
+                        return;
+                    }
+
+                    if (!confirm(`Found ${jsonRows.length} records. Do you want to import them?`)) return;
+
+                    let successCount = 0;
+                    let errorCount = 0;
+
+                    const displayArea = document.getElementById('survey_display_area');
+                    const originalContent = displayArea.innerHTML;
+                    displayArea.innerHTML = `<div style="text-align:center; padding:50px; font-weight:bold; color:#3498db; font-size:1.2rem;">Importing ${jsonRows.length} records... Please wait. Do not close this page.</div>`;
+
+                    for (const row of jsonRows) {
+                        const payload = {
+                            date: row["DATE"] || new Date().toLocaleDateString(),
+                            time: row["TIME"] || new Date().toLocaleTimeString(),
+                            cli: row["CLIENT NAME"] || "Imported Client",
+                            cliNum: row["CLIENT MOBILE"] || "",
+                            loc: row["LOCATION"] || "Unknown Location",
+                            area: row["AREA"] || "0",
+                            size: row["SIZE"] || "0",
+                            emp: row["EMPLOYEE"] || "Imported",
+                            createdBy: userEmail
+                        };
+
+                        try {
+                            const res = await window.authorizedFetch('/api/surveys', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            if (res.ok) {
+                                successCount++;
+                            } else {
+                                errorCount++;
+                            }
+                        } catch (err) {
+                            errorCount++;
+                        }
+                    }
+
+                    alert(`Import Complete!\nSuccessfully added: ${successCount}\nFailed: ${errorCount}`);
+                    await fetchSurveys(); 
+
+                } catch (error) {
+                    alert("Error parsing Excel file: " + error.message);
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         (function applyTheme() {
