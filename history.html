@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deleted Survey Archive - B.K Builders</title>
+    <script src="auth_guard.js"></script>
+    <link rel="stylesheet" href="home_style.css">
+    <style>
+        /* ── Search bar ────────────────────────────── */
+        .search-header {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .search-header input {
+            flex: 1;
+            padding: 11px 16px;
+            border: 1.5px solid #eee;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .search-header input:focus { outline: none; border-color: #e74c3c; }
+
+        /* ── Archive card ───────────────────────────── */
+        .archive-card {
+            background: white;
+            border-radius: 16px;
+            border-left: 7px solid #e74c3c;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.05);
+            margin-bottom: 22px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .archive-card:hover {
+            transform: translateX(6px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.09);
+        }
+
+        /* ── Card header ───────────────────────── */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 22px 12px;
+            background: #fff5f5;
+            border-bottom: 1px solid #ffe5e5;
+        }
+        .card-header .client-name {
+            font-size: 17px;
+            font-weight: 800;
+            color: #c0392b;
+        }
+        .card-header .del-badge {
+            background: #fdecea;
+            color: #e74c3c;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* ── Survey data grid ──────────────────── */
+        .survey-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0;
+            padding: 14px 22px;
+        }
+        .survey-field {
+            padding: 8px 12px;
+            border-right: 1px solid #f5f5f5;
+        }
+        .survey-field:last-child { border-right: none; }
+        .sf-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bbb;
+            margin-bottom: 3px;
+        }
+        .sf-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .sf-value.na { color: #ccc; font-weight: 400; }
+
+        /* ── Deletion info footer ──────────────── */
+        .del-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 22px;
+            background: #fafafa;
+            border-top: 1px solid #f0f0f0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .del-reason {
+            font-size: 12px;
+            color: #666;
+            flex: 1;
+        }
+        .del-reason strong { color: #e74c3c; }
+        .del-meta {
+            font-size: 11px;
+            color: #aaa;
+            white-space: nowrap;
+        }
+
+        /* ── Stats bar ─────────────────────────── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 26px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        }
+        .stat-card .s-val {
+            font-size: 28px;
+            font-weight: 800;
+            color: #e74c3c;
+        }
+        .stat-card .s-lbl {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 4px;
+        }
+
+        /* ── Empty state ───────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #bbb;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state p { font-size: 14px; }
+    </style>
+</head>
+<body style="background: #f8f4f4;">
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="mini-logo" id="sidebarLogo" style="overflow:hidden">CS</div>
+                <h3 id="displayCompany">B.K Builders</h3>
+            </div>
+            <nav class="menu">
+                <a href="home.html"    class="menu-item"><span>🏠</span> Home</a>
+                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
+                <a href="survey.html"  class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
+                <a href="messages.html"  id="msgLink"    class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
+                <a href="tickets.html"   id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
+                <a href="workers.html"   id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
+                <a href="history.html"   class="menu-item active"><span>🗂️</span> Deleted Archive</a>
+                <a href="about.html"   class="menu-item"><span>✨</span> About Creator</a>
+                <a href="admin.html"   id="adminLink" class="menu-item" style="display:none;"><span>🛡️</span> Admin Dashboard</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div>
+                    <h2 style="margin-bottom:4px;">🗂️ Deleted Survey Archive</h2>
+                    <p style="font-size:13px; color:#888; margin:0;">Securely stored records of all deleted surveys — for future reference.</p>
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <div class="stats-bar" id="statsBar" style="display:none;">
+                <div class="stat-card">
+                    <div class="s-val" id="statTotal">—</div>
+                    <div class="s-lbl">Total Deleted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="s-val" id="statLatest">—</div>
+                    <div class="s-lbl">Latest Deletion</div>
+                </div>
+                <div class="stat-card">
+                    <div class="s-val" id="statBy">—</div>
+                    <div class="s-lbl">Deleted By (Most)</div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-header">
+                <span style="font-size:18px; color:#aaa;">🔍</span>
+                <input type="text" id="searchQuery"
+                    placeholder="Search by client, location, area, employee, reason..."
+                    oninput="filterLogs()">
+                <button onclick="resetSearch()"
+                    style="padding:10px 16px; background:#eee; border:none; border-radius:8px; cursor:pointer; font-size:13px;">
+                    ✕ Clear
+                </button>
+            </div>
+
+            <!-- Archive list -->
+            <div id="archiveContainer">
+                <div class="empty-state">
+                    <div class="icon">⏳</div>
+                    <p>Loading archive...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const adminEmail = localStorage.getItem('regEmail');
+        const adminRole  = localStorage.getItem('userRole');
+
+        // Admin / Owner guard
+        if (adminRole !== 'Admin' && adminRole !== 'Owner') {
+            window.location.href = 'home.html';
+        }
+
+        let allLogs = [];
+
+        window.onload = async function () {
+            document.getElementById('displayCompany').innerText =
+                localStorage.getItem('regCompany') || 'B.K Builders';
+            loadSavedLogo();
+
+            // Show admin-only links
+            ['adminLink','workerLink','ticketLink','msgLink'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'block';
+            });
+
+            await fetchLogs();
+        };
+
+        function loadSavedLogo() {
+            const logo = localStorage.getItem('companyLogo');
+            const div  = document.getElementById('sidebarLogo');
+            if (logo && div)
+                div.innerHTML = `<img src="${logo}" style="width:100%;height:100%;border-radius:12px;object-fit:cover;">`;
+        }
+
+        async function fetchLogs() {
+            const container = document.getElementById('archiveContainer');
+            try {
+                const res = await authorizedFetch(`/api/logs/deleted?adminEmail=${adminEmail}`);
+                if (!res.ok) {
+                    const err = await res.json();
+                    container.innerHTML = `<div class="empty-state"><div class="icon">🔒</div><p>${err.message}</p></div>`;
+                    return;
+                }
+                allLogs = await res.json();
+                renderStats(allLogs);
+                renderLogs(allLogs);
+            } catch (e) {
+                container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>Failed to connect to server.</p></div>`;
+            }
+        }
+
+        function renderStats(logs) {
+            if (logs.length === 0) return;
+            document.getElementById('statsBar').style.display = 'grid';
+            document.getElementById('statTotal').textContent = logs.length;
+
+            // Latest date
+            const latest = logs[0]; // already sorted desc
+            document.getElementById('statLatest').textContent =
+                latest ? new Date(latest.deletedAt).toLocaleDateString('en-IN') : '—';
+
+            // Most frequent deleter
+            const counts = {};
+            logs.forEach(l => {
+                const name = (l.deletedBy || 'Unknown').split('@')[0];
+                counts[name] = (counts[name] || 0) + 1;
+            });
+            const topDeleter = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+            document.getElementById('statBy').textContent =
+                topDeleter ? topDeleter[0] : '—';
+        }
+
+        function renderLogs(logs) {
+            const container = document.getElementById('archiveContainer');
+
+            if (logs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">✅</div>
+                        <p>No deleted surveys found. All records are intact.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = logs.map(log => {
+                const s = log.surveyData || {};
+                const delDate = log.deletedAt
+                    ? new Date(log.deletedAt).toLocaleString('en-IN')
+                    : '—';
+                const surveyDate = s.date || '—';
+
+                const val = (v) => v
+                    ? `<span class="sf-value">${v}</span>`
+                    : `<span class="sf-value na">N/A</span>`;
+
+                const fileLink = s.filePath
+                    ? `<a href="${s.filePath}" target="_blank" style="color:#3498db; font-size:12px; font-weight:700;">📄 View File</a>`
+                    : `<span class="sf-value na">No File</span>`;
+
+                return `
+                <div class="archive-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="client-name">🗑️ ${(s.cli || 'Unknown Client').toUpperCase()}</div>
+                            <div style="font-size:12px; color:#888; margin-top:3px;">
+                                📍 ${s.loc || 'N/A'} &nbsp;•&nbsp; 📅 ${surveyDate}
+                            </div>
+                        </div>
+                        <span class="del-badge">Deleted</span>
+                    </div>
+
+                    <div class="survey-grid">
+                        <div class="survey-field">
+                            <div class="sf-label">Client</div>
+                            ${val(s.cli)}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Mobile</div>
+                            ${s.cliNum
+                                ? `<a href="tel:${s.cliNum}" class="sf-value" style="color:#3498db; text-decoration:none;">📞 ${s.cliNum}</a>`
+                                : `<span class="sf-value na">N/A</span>`}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Location</div>
+                            ${val(s.loc)}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Area</div>
+                            ${val(s.area)}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Size</div>
+                            ${val(s.size)}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Surveyed By</div>
+                            ${val(s.emp)}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Survey Date</div>
+                            ${val(s.date)}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Instrument</div>
+                            ${val(s.instrument)}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Attached File</div>
+                            ${fileLink}
+                        </div>
+                        <div class="survey-field">
+                            <div class="sf-label">Originally Created By</div>
+                            ${val(s.createdBy ? s.createdBy.split('@')[0] : null)}
+                        </div>
+                    </div>
+
+                    <div class="del-info">
+                        <div class="del-reason">
+                            🗒️ Reason: <strong>${log.reason || 'No reason provided'}</strong>
+                        </div>
+                        <div class="del-meta">
+                            🙍 Deleted by: <strong>${(log.deletedBy || '').split('@')[0]}</strong>
+                            &nbsp;•&nbsp; 🕒 ${delDate}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function filterLogs() {
+            const q = document.getElementById('searchQuery').value.toLowerCase().trim();
+            if (!q) { renderLogs(allLogs); return; }
+
+            const filtered = allLogs.filter(log => {
+                const s = log.surveyData || {};
+                return (
+                    (s.cli  || '').toLowerCase().includes(q) ||
+                    (s.loc  || '').toLowerCase().includes(q) ||
+                    (s.area || '').toLowerCase().includes(q) ||
+                    (s.emp  || '').toLowerCase().includes(q) ||
+                    (s.date || '').includes(q) ||
+                    (log.reason   || '').toLowerCase().includes(q) ||
+                    (log.deletedBy|| '').toLowerCase().includes(q)
+                );
+            });
+
+            renderStats(filtered);
+            renderLogs(filtered);
+        }
+
+        function resetSearch() {
+            document.getElementById('searchQuery').value = '';
+            renderStats(allLogs);
+            renderLogs(allLogs);
+        }
+
+        // Apply dark mode
+        (function() {
+            if (localStorage.getItem('darkMode') === 'enabled')
+                document.body.classList.add('dark_theme');
+        })();
+    </script>
+</body>
+</html>

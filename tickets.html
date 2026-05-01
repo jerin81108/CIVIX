@@ -8,6 +8,8 @@
     <style>
         .ticket-card { background: white; padding: 25px; border-radius: 18px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-left: 8px solid #f1c40f; transition: 0.3s; }
         .ticket-card.Approved { border-color: #2ecc71; opacity: 0.8; }
+        .ticket-card.payment-ticket { border-left-color: #3498db; }
+        .ticket-card.payment-ticket.Approved { border-left-color: #2ecc71; }
         .ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .ticket-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .diff-box { background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1.5px dashed #eee; }
@@ -15,9 +17,17 @@
         .new-val { color: #2d5a27; font-weight: 800; display: block; font-size: 15px; margin-top: 5px; }
         .approve-btn { background: #2d5a27; color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .approve-btn:hover { background: #1e3e1a; }
+        .noted-btn { background: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .noted-btn:hover { background: #2176ae; }
         .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
         .Pending { background: #fff5e6; color: #d68910; }
         .Approved { background: #e8f5e9; color: #2ecc71; }
+        .payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+        .payment-stat { background: #f0f7ff; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #dbeafe; }
+        .payment-stat .p-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: #888; margin-bottom: 4px; }
+        .payment-stat .p-value { font-size: 16px; font-weight: 800; color: #2c3e50; }
+        .payment-stat .p-value.green { color: #27ae60; }
+        .payment-stat .p-value.red { color: #e74c3c; }
     </style>
 </head>
 <body style="background: #f8fbf8;">
@@ -57,11 +67,17 @@
         const adminEmail = localStorage.getItem("regEmail");
         const adminRole = localStorage.getItem("userRole");
 
-        if (adminRole !== "Admin") {
+        if (adminRole !== "Admin" && adminRole !== "Owner") {
             window.location.href = "home.html";
         }
 
         async function loadTickets() {
+            // Show administrative links
+            if (adminRole === "Admin" || adminRole === "Owner") {
+                if (document.getElementById("msgLink")) document.getElementById("msgLink").style.display = "block";
+                if (document.getElementById("workerLink")) document.getElementById("workerLink").style.display = "block";
+            }
+
             try {
                 const res = await authorizedFetch(`/api/tickets/all?adminEmail=${adminEmail}`);
                 const tickets = await res.json();
@@ -76,6 +92,55 @@
                 
                 tickets.forEach(t => {
                     const card = document.createElement('div');
+
+                    // ── Payment Ticket (💳) ──────────────────────────────────
+                    if (t.ticketType === 'payment') {
+                        card.className = `ticket-card payment-ticket ${t.status}`;
+                        const methodIcon = { cash: '💵', cheque: '📄', rtgs: '🏦', gpay: '📱' }[t.receivedOn] || '💳';
+                        card.innerHTML = `
+                            <div class="ticket-header">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <span class="status-badge ${t.status}">${t.status}</span>
+                                    <span style="background:#dbeafe; color:#2176ae; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">💳 PAYMENT</span>
+                                    <strong style="color:#2c3e50;">Survey #${t.surveyId.slice(-6).toUpperCase()}</strong>
+                                </div>
+                                <span style="font-size:12px; color:#aaa;">${new Date(t.createdAt).toLocaleString()}</span>
+                            </div>
+                            <div style="margin-bottom:14px; font-size:14px; color:#555;">
+                                <strong>Client:</strong> ${t.clientName || '—'} &nbsp;|&nbsp; <strong>Location:</strong> ${t.location || '—'}
+                            </div>
+                            <div class="payment-grid">
+                                <div class="payment-stat">
+                                    <div class="p-label">Amount Paid</div>
+                                    <div class="p-value green">₹${(t.amountPaid || 0).toLocaleString()}</div>
+                                </div>
+                                <div class="payment-stat">
+                                    <div class="p-label">Discount</div>
+                                    <div class="p-value red">₹${(t.amountReduction || 0).toLocaleString()}</div>
+                                </div>
+                                <div class="payment-stat">
+                                    <div class="p-label">Method</div>
+                                    <div class="p-value" style="font-size:13px;">${methodIcon} ${(t.receivedOn || 'cash').toUpperCase()}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top:12px; font-size:12px; color:#888; display:flex; gap:18px;">
+                                <span>📅 Received: <strong>${t.receivedDate || '—'}</strong></span>
+                                <span>📋 Quotation: <strong>${t.quotationDate || '—'}</strong></span>
+                                <span>✅ OK Date: <strong>${t.okDate || '—'}</strong></span>
+                            </div>
+                            <div style="margin-top:14px; display:flex; align-items:center; justify-content:space-between;">
+                                <span style="font-size:11px; color:#888;">Submitted by: <strong>${t.requestedBy}</strong></span>
+                                ${t.status === 'Pending' ?
+                                    `<button class="noted-btn" onclick="markPaymentNoted('${t.id}')">✔ Mark as Noted</button>` :
+                                    `<button disabled class="noted-btn" style="background:#eee;color:#aaa;cursor:default;">✔ Noted</button>`
+                                }
+                            </div>
+                        `;
+                        container.appendChild(card);
+                        return;
+                    }
+
+                    // ── Survey Field-Change Ticket ────────────────────────────
                     card.className = `ticket-card ${t.status}`;
                     
                     const fieldLabels = {
@@ -119,7 +184,7 @@
                             <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
                                 <p style="font-size:11px; color:#888; margin-bottom:10px;">Requested by: ${t.requestedBy}</p>
                                 ${t.status === 'Pending' ? `
-                                    <button class="approve-btn" onclick="approveTicket(${t.id})">Approve & Apply Correct</button>
+                                    <button class="approve-btn" onclick="approveTicket('${t.id}')">Approve & Apply Correct</button>
                                 ` : `<button disabled class="approve-btn" style="background:#eee; color:#aaa; cursor:default;">Processed</button>`}
                             </div>
                         </div>
@@ -148,6 +213,24 @@
                 
                 if (res.ok) {
                     alert("Change Applied! Record has been updated.");
+                    loadTickets();
+                } else {
+                    const data = await res.json();
+                    alert("Error: " + data.message);
+                }
+            } catch (err) {
+                alert("Connection error.");
+            }
+        }
+
+        async function markPaymentNoted(id) {
+            try {
+                const res = await authorizedFetch('/api/tickets/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminEmail, ticketId: id })
+                });
+                if (res.ok) {
                     loadTickets();
                 } else {
                     const data = await res.json();

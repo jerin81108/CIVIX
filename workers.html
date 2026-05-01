@@ -70,12 +70,18 @@
         const adminRole = localStorage.getItem("userRole");
 
         // Auth Check
-        if (adminRole !== "Admin") {
+        if (adminRole !== "Admin" && adminRole !== "Owner") {
             alert("Administrative Access Only");
             window.location.href = "home.html";
         }
 
         async function loadEmployees() {
+            // Show administrative links
+            if (adminRole === "Admin" || adminRole === "Owner") {
+                if (document.getElementById("msgLink")) document.getElementById("msgLink").style.display = "block";
+                if (document.getElementById("ticketLink")) document.getElementById("ticketLink").style.display = "block";
+            }
+
             try {
                 const response = await authorizedFetch(`/api/admin/users/all?adminEmail=${adminEmail}`);
                 const users = await response.json();

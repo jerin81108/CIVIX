@@ -65,6 +65,12 @@
     </div>
     <script>
         const adminEmail = localStorage.getItem("regEmail");
+        const adminRole = localStorage.getItem("userRole");
+
+        if (adminRole !== "Admin" && adminRole !== "Owner") {
+            alert("Administrative Access Only");
+            window.location.href = "home.html";
+        }
 
         async function createEmployee() {
             const name = document.getElementById('newEmpName').value;

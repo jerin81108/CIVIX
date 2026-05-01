@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,32 +9,64 @@
     <script src="auth_guard.js"></script>
     <link rel="stylesheet" href="home_style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .menu-item {
+            position: relative;
+        }
+
+        .noti-badge {
+            background: #e74c3c;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 12px;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+            border: 2px solid #2d5a27;
+        }
+    </style>
 </head>
+
 <body>
 
     <div class="dashboard-container surveying-vibe">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="mini-logo">
-                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path><path d="M12 8l-2 4h4l-2 4"></path></svg>
+                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path
+                            d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                        </path>
+                        <path d="M12 8l-2 4h4l-2 4"></path>
+                    </svg>
                 </div>
                 <h3 id="displayCompany">Loading...</h3>
             </div>
-            
+
             <nav class="menu">
                 <p class="menu-label">Main Menu</p>
                 <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
                 <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
                 <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
                 <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
-                <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
-                <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
+                <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest
+                    Messages <span id="msgBadge" class="noti-badge">0</span></a>
+                <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change
+                    Requests <span id="ticketBadge" class="noti-badge">0</span></a>
                 <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
-                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
-                <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin
+                    Dashboard</a>
+                <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers
+                    Directory</a>
 
                 <a href="settings.html" class="menu-item"><span>⚙️</span> Settings</a>
-               <p class="menu-label">Project Intelligence</p>
+                <p class="menu-label">Project Intelligence</p>
                 <div class="menu-item locked"><span>📍</span> Land Mapping (Soon)</div>
                 <div class="menu-item active"><span>📊</span> Analytics</div>
             </nav>
@@ -47,15 +80,19 @@
             <header class="top-bar">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <h2 style="margin: 0;">Welcome back, <span id="welcomeName">User</span></h2>
-                    <div class="live-pulse-container" style="display: flex; align-items: center; gap: 6px; background: rgba(46, 204, 113, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(46, 204, 113, 0.2);">
+                    <div class="live-pulse-container"
+                        style="display: flex; align-items: center; gap: 6px; background: rgba(46, 204, 113, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(46, 204, 113, 0.2);">
                         <span class="pulse-dot"></span>
-                        <span style="font-size: 10px; font-weight: 800; color: #2ecc71; text-transform: uppercase; letter-spacing: 0.5px;">Live Sync</span>
+                        <span
+                            style="font-size: 10px; font-weight: 800; color: #2ecc71; text-transform: uppercase; letter-spacing: 0.5px;">Live
+                            Sync</span>
                     </div>
                 </div>
                 <div class="date-display" id="currentDate"></div>
             </header>
 
-            <section class="premium-stats-grid" style="margin-top: 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; animation: slideUp 0.6s ease-out;">
+            <section class="premium-stats-grid"
+                style="margin-top: 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; animation: slideUp 0.6s ease-out;">
                 <div class="card stat-card-glass">
                     <span class="stat-label">Total Volume</span>
                     <h3 id="total_surveys_stat">2,481</h3>
@@ -77,161 +114,226 @@
                     <span class="stat-trend" style="color:#e67e22;">Latency Optimized</span>
                 </div>
             </section>
-                <section class="dashboard_grid">
-                    <div class="card survey-card-premium" onclick="document.getElementById('factoryPlanModal').style.display='block'" style="cursor: pointer; border-left: 4px solid #f1c40f; transition: transform 0.3s; background: rgba(255, 255, 255, 0.05);">
-                        <div class="card_icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                        </div>
-                        <div class="card_info">
-                            <span class="label">Blueprint Viewer</span>
-                            <h2>I.F. Plan</h2>
-                            <p style="font-size: 11px; color: #f1c40f; font-weight: bold;">Click to expand Topo Sketches</p>
-                        </div>
+            <section class="dashboard_grid">
+                <div class="card survey-card-premium"
+                    onclick="document.getElementById('factoryPlanModal').style.display='block'"
+                    style="cursor: pointer; border-left: 4px solid #f1c40f; transition: transform 0.3s; background: rgba(255, 255, 255, 0.05);">
+                    <div class="card_icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
                     </div>
-
-                    <div class="card survey-card-premium" onclick="document.getElementById('homePlanModal').style.display='block'" style="cursor: pointer; border-left: 4px solid #3498db; transition: transform 0.3s; background: rgba(255, 255, 255, 0.05);">
-                        <div class="card_icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                        </div>
-                        <div class="card_info">
-                            <span class="label">Panchayat Plan Viewer</span>
-                            <h2>Home Plan</h2>
-                            <p style="font-size: 11px; color: #3498db; font-weight: bold;">Click to expand Architect Sketches</p>
-                        </div>
+                    <div class="card_info">
+                        <span class="label">Blueprint Viewer</span>
+                        <h2>I.F. Plan</h2>
+                        <p style="font-size: 11px; color: #f1c40f; font-weight: bold;">Click to expand Topo Sketches</p>
                     </div>
-
-                    <div class="card survey-card-premium">
-                        <div class="card_icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2d5a27" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                        </div>
-                        <div class="card_info">
-                            <span class="label">Mapped Units</span>
-                            <h2 id="total_survey_count">0</h2>
-                        </div>
-                        <div class="card_progress_bar"><div class="fill" style="width: 75%;"></div></div>
-                    </div>
-
-                    <div class="card survey-card-premium" id="appointment_card">
-                        <div class="card_icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
-                        </div>
-                        <div class="card_info">
-                            <span class="label">Field Schedule</span>
-                            <h2 id="appointment_status">On Track</h2>
-                            <p id="appointment_detail" style="font-size: 11px; color: #2ecc71; font-weight: bold;">Precision in Progress</p>
-                        </div>
-                    </div>
-
-                    <div class="card motivation-card">
-                        <div class="card_info">
-                            <span class="label">💡 Daily Inspiration</span>
-                            <p id="engineers_quote" style="font-style: italic; font-size: 13px; color: #444; margin-top: 5px;">"Engineering is the art of directing the great sources of power in nature for the use and convenience of man."</p>
-                            <span id="quote_author" style="font-size: 11px; color: #888; font-weight: 600;">— Thomas Tredgold</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- New Analytics Section -->
-                <section class="analytics-showcase" style="margin-top: 40px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-                    <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
-                        <h3 style="margin-top: 0; color: #2d5a27;">📈 Survey Velocity</h3>
-                        <div style="width: 100%; height: 250px;">
-                            <canvas id="velocityChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
-                        <h3 style="margin-top: 0; color: #2d5a27;">📍 Map Distribution</h3>
-                        <div style="width: 100%; height: 250px;">
-                            <canvas id="locationChart"></canvas>
-                        </div>
-                    </div>
-                </section>
-                <div class="fab_container">
-                    <a href="survey_form.html" class="fab_main">
-                        <div class="fab_icon_circle">
-                            <span class="plus_sign">+</span>
-                        </div>
-                        <span class="fab_text">New Survey</span>
-                    </a>
                 </div>
-                <!-- Technical Telemetry Section (Minute Details) -->
-                <section class="technical-telemetry" style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #f1c40f;">
-                        <span class="label" style="font-size: 10px; color: #888;">🛰️ GNSS STATUS</span>
-                        <div style="display: flex; justify-content: space-between; width: 100%;">
-                            <span style="font-weight: 800; color: #2d5a27;">FIXED (RTK)</span>
-                            <span style="color: #2ecc71; font-size: 12px;">● Online</span>
-                        </div>
-                        <p style="font-size: 11px; margin: 0; color: #666;">H: 0.008m | V: 0.015m</p>
-                    </div>
-                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #3498db;">
-                        <span class="label" style="font-size: 10px; color: #888;">🌏 COORDINATE SYSTEM</span>
-                        <span style="font-weight: 800; color: #333;">UTM ZONE 44N</span>
-                        <p style="font-size: 11px; margin: 0; color: #666;">WGS84 Ellipsoid | EPSG:32644</p>
-                    </div>
-                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #e67e22;">
-                        <span class="label" style="font-size: 10px; color: #888;">📐 INSTRUMENT ERROR</span>
-                        <div style="display: flex; justify-content: space-between; width: 100%;">
-                            <span style="font-weight: 800; color: #333;">2.4" ARC SEC</span>
-                            <span style="color: #e67e22; font-size: 10px;">Calibrated</span>
-                        </div>
-                        <p style="font-size: 11px; margin: 0; color: #666;">Compensator: Enabled</p>
-                    </div>
-                    <div class="card survey-card-premium" style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #9b59b6;">
-                        <span class="label" style="font-size: 10px; color: #888;">🏗️ SCALE FACTOR</span>
-                        <span style="font-weight: 800; color: #333;">0.99994520</span>
-                        <p style="font-size: 11px; margin: 0; color: #666;">Grid to Ground Correction</p>
-                    </div>
-                </section>
 
-                <section class="welcome_header" style="animation: fadeIn 1s ease;">
-                    <div class="greeting_box" style="flex: 1;">
-                        <h1 id="dynamic_greeting" style="font-size: 2.2rem; margin-bottom: 5px;">Welcome!</h1>
-                        <p id="civil_fact" class="fact_text" style="background: rgba(45, 90, 39, 0.05); padding: 12px 20px; border-radius: 12px; border-left: 4px solid #f1c40f;">Loading civil engineering fact...</p>
+                <div class="card survey-card-premium"
+                    onclick="document.getElementById('homePlanModal').style.display='block'"
+                    style="cursor: pointer; border-left: 4px solid #3498db; transition: transform 0.3s; background: rgba(255, 255, 255, 0.05);">
+                    <div class="card_icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="1.5">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
                     </div>
-                    
-                    <div class="weather_widget tech-widget" style="background: linear-gradient(135deg, #3498db 0%, #1a5276 100%); color: white; padding: 20px; border-radius: 22px; width: 220px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(52, 152, 219, 0.4); border: 2px solid #5dade2;">
-                        <div id="weather_icon" style="font-size: 30px; margin-bottom: 5px;">🛰️</div>
-                        <div class="weather_info">
-                            <h2 id="temp_display" style="margin: 0; font-size: 1.8rem; color: #1a5276;">28°C</h2>
-                            <p id="weather_desc" style="margin: 2px 0; font-size: 12px; opacity: 0.8; color: #b43535;">G.P.S Locked</p>
-                            <div style="display: flex; gap: 10px; font-size: 9px; margin-top: 8px; font-weight: 700; color: #1a5276;">
-                                <span>💨 12KM/H</span>
-                                <span>💧 64%</span>
-                            </div>
+                    <div class="card_info">
+                        <span class="label">Panchayat Plan Viewer</span>
+                        <h2>Home Plan</h2>
+                        <p style="font-size: 11px; color: #3498db; font-weight: bold;">Click to expand Architect
+                            Sketches</p>
+                    </div>
+                </div>
+
+                <div class="card survey-card-premium">
+                    <div class="card_icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2d5a27" stroke-width="1.5">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <div class="card_info">
+                        <span class="label">Mapped Units</span>
+                        <h2 id="total_survey_count">0</h2>
+                    </div>
+                    <div class="card_progress_bar">
+                        <div class="fill" style="width: 75%;"></div>
+                    </div>
+                </div>
+
+                <div class="card survey-card-premium" id="appointment_card">
+                    <div class="card_icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 8v4l3 3"></path>
+                        </svg>
+                    </div>
+                    <div class="card_info">
+                        <span class="label">Field Schedule</span>
+                        <h2 id="appointment_status">On Track</h2>
+                        <p id="appointment_detail" style="font-size: 11px; color: #2ecc71; font-weight: bold;">Precision
+                            in Progress</p>
+                    </div>
+                </div>
+
+                <div class="card motivation-card">
+                    <div class="card_info">
+                        <span class="label">💡 Daily Inspiration</span>
+                        <p id="engineers_quote"
+                            style="font-style: italic; font-size: 13px; color: #444; margin-top: 5px;">"Engineering is
+                            the art of directing the great sources of power in nature for the use and convenience of
+                            man."</p>
+                        <span id="quote_author" style="font-size: 11px; color: #888; font-weight: 600;">— Thomas
+                            Tredgold</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New Analytics Section -->
+            <section class="analytics-showcase"
+                style="margin-top: 40px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
+                    <h3 style="margin-top: 0; color: #2d5a27;">📈 Survey Velocity</h3>
+                    <div style="width: 100%; height: 250px;">
+                        <canvas id="velocityChart"></canvas>
+                    </div>
+                </div>
+                <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
+                    <h3 style="margin-top: 0; color: #2d5a27;">📍 Map Distribution</h3>
+                    <div style="width: 100%; height: 250px;">
+                        <canvas id="locationChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            <div class="fab_container">
+                <a href="survey_form.html" class="fab_main">
+                    <div class="fab_icon_circle">
+                        <span class="plus_sign">+</span>
+                    </div>
+                    <span class="fab_text">New Survey</span>
+                </a>
+            </div>
+            <!-- Technical Telemetry Section (Minute Details) -->
+            <section class="technical-telemetry"
+                style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div class="card survey-card-premium"
+                    style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #f1c40f;">
+                    <span class="label" style="font-size: 10px; color: #888;">🛰️ GNSS STATUS</span>
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <span style="font-weight: 800; color: #2d5a27;">FIXED (RTK)</span>
+                        <span style="color: #2ecc71; font-size: 12px;">● Online</span>
+                    </div>
+                    <p style="font-size: 11px; margin: 0; color: #666;">H: 0.008m | V: 0.015m</p>
+                </div>
+                <div class="card survey-card-premium"
+                    style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #3498db;">
+                    <span class="label" style="font-size: 10px; color: #888;">🌏 COORDINATE SYSTEM</span>
+                    <span style="font-weight: 800; color: #333;">UTM ZONE 44N</span>
+                    <p style="font-size: 11px; margin: 0; color: #666;">WGS84 Ellipsoid | EPSG:32644</p>
+                </div>
+                <div class="card survey-card-premium"
+                    style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #e67e22;">
+                    <span class="label" style="font-size: 10px; color: #888;">📐 INSTRUMENT ERROR</span>
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <span style="font-weight: 800; color: #333;">2.4" ARC SEC</span>
+                        <span style="color: #e67e22; font-size: 10px;">Calibrated</span>
+                    </div>
+                    <p style="font-size: 11px; margin: 0; color: #666;">Compensator: Enabled</p>
+                </div>
+                <div class="card survey-card-premium"
+                    style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #9b59b6;">
+                    <span class="label" style="font-size: 10px; color: #888;">🏗️ SCALE FACTOR</span>
+                    <span style="font-weight: 800; color: #333;">0.99994520</span>
+                    <p style="font-size: 11px; margin: 0; color: #666;">Grid to Ground Correction</p>
+                </div>
+            </section>
+
+            <section class="welcome_header" style="animation: fadeIn 1s ease;">
+                <div class="greeting_box" style="flex: 1;">
+                    <h1 id="dynamic_greeting" style="font-size: 2.2rem; margin-bottom: 5px;">Welcome!</h1>
+                    <p id="civil_fact" class="fact_text"
+                        style="background: rgba(45, 90, 39, 0.05); padding: 12px 20px; border-radius: 12px; border-left: 4px solid #f1c40f;">
+                        Loading civil engineering fact...</p>
+                </div>
+
+                <div class="weather_widget tech-widget"
+                    style="background: linear-gradient(135deg, #3498db 0%, #1a5276 100%); color: white; padding: 20px; border-radius: 22px; width: 220px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(52, 152, 219, 0.4); border: 2px solid #5dade2;">
+                    <div id="weather_icon" style="font-size: 30px; margin-bottom: 5px;">🛰️</div>
+                    <div class="weather_info">
+                        <h2 id="temp_display" style="margin: 0; font-size: 1.8rem; color: #1a5276;">28°C</h2>
+                        <p id="weather_desc" style="margin: 2px 0; font-size: 12px; opacity: 0.8; color: #b43535;">G.P.S
+                            Locked</p>
+                        <div
+                            style="display: flex; gap: 10px; font-size: 9px; margin-top: 8px; font-weight: 700; color: #1a5276;">
+                            <span>💨 12KM/H</span>
+                            <span>💧 64%</span>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
             </section>
         </main>
     </div>
 
     <!-- Factory Plan Modal -->
-    <div id="factoryPlanModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px);">
-        <button onclick="document.getElementById('factoryPlanModal').style.display='none'" style="position: absolute; top: 20px; left: 20px; color: #f1f1f1; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);" onmouseover="this.style.background='rgba(241,196,15,0.2)'; this.style.borderColor='#f1c40f'; this.style.color='#f1c40f';" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.2)'; this.style.color='#f1f1f1';">
+    <div id="factoryPlanModal"
+        style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px);">
+        <button onclick="document.getElementById('factoryPlanModal').style.display='none'"
+            style="position: absolute; top: 20px; left: 20px; color: #f1f1f1; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);"
+            onmouseover="this.style.background='rgba(241,196,15,0.2)'; this.style.borderColor='#f1c40f'; this.style.color='#f1c40f';"
+            onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.2)'; this.style.color='#f1f1f1';">
             <span>←</span> Back
         </button>
-        <span onclick="document.getElementById('factoryPlanModal').style.display='none'" style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001;">&times;</span>
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; padding: 60px 20px 60px 20px; gap: 30px;">
-            <img src="factory plan.jpeg" style="max-width: 95%; max-height: 90vh; border: 3px solid #f1c40f; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain;" alt="Factory Plan 1">
-            <img src="factory plan1.jpeg" style="max-width: 95%; max-height: 90vh; border: 3px solid #f1c40f; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain;" alt="Factory Plan 2">
-            <div style="color: white; margin-top: 5px; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">M/s. SRI ROYAL DESIGN - TOPO SKETCH PLANS</div>
-            <button onclick="document.getElementById('factoryPlanModal').style.display='none'" style="margin-top: 20px; background: transparent; border: 2px solid #f1c40f; color: #f1c40f; padding: 12px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: inherit; letter-spacing: 1px;" onmouseover="this.style.background='#f1c40f'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#f1c40f';">← Back to Dashboard</button>
+        <span onclick="document.getElementById('factoryPlanModal').style.display='none'"
+            style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001;">&times;</span>
+        <div
+            style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; padding: 60px 20px 60px 20px; gap: 30px;">
+            <img src="factory plan.jpeg"
+                style="max-width: 95%; max-height: 90vh; border: 3px solid #f1c40f; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain;"
+                alt="Factory Plan 1">
+            <img src="factory plan1.jpeg"
+                style="max-width: 95%; max-height: 90vh; border: 3px solid #f1c40f; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain;"
+                alt="Factory Plan 2">
+            <div style="color: white; margin-top: 5px; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">M/s.
+                SRI ROYAL DESIGN - TOPO SKETCH PLANS</div>
+            <button onclick="document.getElementById('factoryPlanModal').style.display='none'"
+                style="margin-top: 20px; background: transparent; border: 2px solid #f1c40f; color: #f1c40f; padding: 12px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: inherit; letter-spacing: 1px;"
+                onmouseover="this.style.background='#f1c40f'; this.style.color='#000';"
+                onmouseout="this.style.background='transparent'; this.style.color='#f1c40f';">← Back to
+                Dashboard</button>
         </div>
     </div>
 
     <!-- Home Plan Modal -->
-    <div id="homePlanModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px);">
-        <button onclick="document.getElementById('homePlanModal').style.display='none'" style="position: absolute; top: 20px; left: 20px; color: #f1f1f1; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);" onmouseover="this.style.background='rgba(52, 152, 219, 0.2)'; this.style.borderColor='#3498db'; this.style.color='#3498db';" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.2)'; this.style.color='#f1f1f1';">
+    <div id="homePlanModal"
+        style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px);">
+        <button onclick="document.getElementById('homePlanModal').style.display='none'"
+            style="position: absolute; top: 20px; left: 20px; color: #f1f1f1; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px);"
+            onmouseover="this.style.background='rgba(52, 152, 219, 0.2)'; this.style.borderColor='#3498db'; this.style.color='#3498db';"
+            onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.2)'; this.style.color='#f1f1f1';">
             <span>←</span> Back
         </button>
-        <span onclick="document.getElementById('homePlanModal').style.display='none'" style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001;">&times;</span>
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; padding: 60px 20px 60px 20px; gap: 30px;">
+        <span onclick="document.getElementById('homePlanModal').style.display='none'"
+            style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 1001;">&times;</span>
+        <div
+            style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; padding: 60px 20px 60px 20px; gap: 30px;">
             <!-- Placeholder for actual home plan images or using factory plans provisionally -->
-            <img src="factory plan.jpeg" style="max-width: 95%; max-height: 90vh; border: 3px solid #3498db; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain; filter: hue-rotate(180deg);" alt="Home Plan Provisional">
-            <img src="factory plan1.jpeg" style="max-width: 95%; max-height: 90vh; border: 3px solid #3498db; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain; filter: hue-rotate(180deg);" alt="Home Plan Provisional 2">
-            <div style="color: white; margin-top: 5px; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">M/s. PANCHAYAT APPROVED - HOME ARCHITECTURE PLAN</div>
-            <button onclick="document.getElementById('homePlanModal').style.display='none'" style="margin-top: 20px; background: transparent; border: 2px solid #3498db; color: #3498db; padding: 12px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: inherit; letter-spacing: 1px;" onmouseover="this.style.background='#3498db'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#3498db';">← Back to Dashboard</button>
+            <img src="factory plan.jpeg"
+                style="max-width: 95%; max-height: 90vh; border: 3px solid #3498db; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain; filter: hue-rotate(180deg);"
+                alt="Home Plan Provisional">
+            <img src="factory plan1.jpeg"
+                style="max-width: 95%; max-height: 90vh; border: 3px solid #3498db; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: contain; filter: hue-rotate(180deg);"
+                alt="Home Plan Provisional 2">
+            <div style="color: white; margin-top: 5px; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">M/s.
+                PANCHAYAT APPROVED - HOME ARCHITECTURE PLAN</div>
+            <button onclick="document.getElementById('homePlanModal').style.display='none'"
+                style="margin-top: 20px; background: transparent; border: 2px solid #3498db; color: #3498db; padding: 12px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: inherit; letter-spacing: 1px;"
+                onmouseover="this.style.background='#3498db'; this.style.color='#000';"
+                onmouseout="this.style.background='transparent'; this.style.color='#3498db';">← Back to
+                Dashboard</button>
         </div>
     </div>
 
@@ -247,15 +349,15 @@
             }
         })();
 
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', async function () {
             // 1. IDENTITY & NAVIGATION
             const regCompany = localStorage.getItem("regCompany") || localStorage.getItem("registeredCompany") || "User";
             const userRole = localStorage.getItem("userRole");
-            
+
             document.getElementById("displayCompany").innerText = regCompany;
             document.getElementById("welcomeName").innerText = regCompany;
-            
-            if (userRole === "Admin") {
+
+            if (userRole === "Admin" || userRole === "Owner") {
                 document.getElementById("adminLink").style.display = "block";
                 if (document.getElementById("workerLink")) document.getElementById("workerLink").style.display = "block";
                 if (document.getElementById("ticketLink")) document.getElementById("ticketLink").style.display = "block";
@@ -276,7 +378,7 @@
             let greeting = "Good Evening";
             if (hours < 12) greeting = "Good Morning";
             else if (hours < 17) greeting = "Good Afternoon";
-            
+
             document.getElementById('dynamic_greeting').innerText = `${greeting}, ${regCompany}! 🏗️`;
             document.getElementById('currentDate').innerHTML = `<span>📅</span> Happy ${today}, ${new Date().toLocaleDateString()}`;
 
@@ -303,7 +405,7 @@
                 console.warn('Dashboard: Using fallback data');
                 allSurveys = JSON.parse(localStorage.getItem('survey_reports')) || [];
             }
-            
+
             document.getElementById('total_survey_count').innerText = allSurveys.length;
             document.getElementById('total_surveys_stat').innerText = allSurveys.length.toLocaleString();
 
@@ -317,7 +419,7 @@
             if (todaysEntries.length > 0) {
                 statusText.innerText = `${todaysEntries.length} Unit(s) Today`;
                 statusDetail.innerText = "Active field operations detected.";
-                appointmentCard.style.borderLeft = "6px solid #f39c12"; 
+                appointmentCard.style.borderLeft = "6px solid #f39c12";
             } else {
                 statusText.innerText = "Log Standby";
                 statusDetail.innerText = "No records added today.";
@@ -328,7 +430,7 @@
                 const analyticsRes = await window.authorizedFetch(`/api/analytics`);
                 if (analyticsRes.ok) {
                     const data = await analyticsRes.json();
-                    
+
                     new Chart(document.getElementById('velocityChart'), {
                         type: 'line',
                         data: {
@@ -371,7 +473,43 @@
             const q = quotes[Math.floor(Math.random() * quotes.length)];
             document.getElementById('engineers_quote').innerText = `"${q.q}"`;
             document.getElementById('quote_author').innerText = `— ${q.a}`;
+
+            // 8. NOTIFICATIONS
+            async function checkNotifications() {
+                const userEmail = localStorage.getItem('regEmail');
+                const userRole = localStorage.getItem('userRole');
+                if (userRole !== 'Admin' && userRole !== 'Owner') return;
+
+                try {
+                    const res = await window.authorizedFetch(`/api/notifications/count?adminEmail=${userEmail}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const ticketBadge = document.getElementById('ticketBadge');
+                        const msgBadge = document.getElementById('msgBadge');
+
+                        if (data.pendingTickets > 0) {
+                            ticketBadge.innerText = data.pendingTickets;
+                            ticketBadge.style.display = 'block';
+                        } else {
+                            ticketBadge.style.display = 'none';
+                        }
+
+                        if (data.messages > 0) {
+                            msgBadge.innerText = data.messages;
+                            msgBadge.style.display = 'block';
+                        } else {
+                            msgBadge.style.display = 'none';
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Notifications sync failed");
+                }
+            }
+
+            checkNotifications();
+            setInterval(checkNotifications, 30000); // Check every 30 seconds
         });
     </script>
 </body>
+
 </html>

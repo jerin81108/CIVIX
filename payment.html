@@ -11,7 +11,7 @@
             font-family: 'Segoe UI', sans-serif;
         }
         .form_wrapper {
-            max-width: 620px;
+            max-width: 660px;
             margin: 40px auto;
             padding: 0 16px;
         }
@@ -37,6 +37,7 @@
             margin-top: 14px;
         }
         .form_box input[type="text"],
+        .form_box input[type="number"],
         .form_box input[type="tel"],
         .form_box input[type="date"],
         .form_box select {
@@ -83,17 +84,241 @@
             transition: background 0.2s;
         }
         .cancel_btn:hover { background: #ddd; }
+
+        /* Custom Search Styles */
+        .search-container { position: relative; }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0; right: 0;
+            background: white;
+            border: 1.5px solid #eee;
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .search-result-item {
+            padding: 14px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid #f5f5f5;
+            transition: all 0.2s;
+        }
+        .search-result-item:hover { background: #f0f7ef; padding-left: 22px; }
+        .search-result-item:last-child { border-bottom: none; }
+        .result-title { font-size: 13px; font-weight: 700; color: #2d5a27; display: block; margin-bottom: 2px; }
+        .result-details { font-size: 11px; color: #888; display: flex; justify-content: space-between; }
+        input.selected-survey { border-color: #2ecc71 !important; background-color: #f0fff4 !important; font-weight: 600; }
+
+        /* Balance Dashboard */
+        .balance-dashboard {
+            background: linear-gradient(135deg, #1a3a17, #2d5a27);
+            border-radius: 14px;
+            padding: 20px;
+            color: white;
+            margin: 15px 0;
+            display: none;
+        }
+        .balance-dashboard .title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 14px;
+        }
+        .balance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .balance-item { text-align: center; }
+        .balance-item .label { font-size: 10px; opacity: 0.65; margin-bottom: 4px; }
+        .balance-item .amount { font-size: 18px; font-weight: 800; }
+        .balance-item .amount.due { color: #f39c12; }
+        .balance-item .amount.paid { color: #2ecc71; }
+        .balance-item .amount.total { color: #fff; }
+
+        .balance-bar-outer {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .balance-bar-fill {
+            background: #2ecc71;
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+        .balance-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+
+        /* Amount History Panel */
+        .amount-history-panel {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 15px 0;
+            display: none;
+        }
+        .amount-history-panel .panel-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #8a6500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .reduction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ffe082;
+            font-size: 12px;
+        }
+        .reduction-item:last-child { border-bottom: none; }
+        .reduction-item .red-info { color: #555; }
+        .reduction-item .red-amount { color: #e74c3c; font-weight: 700; }
+        .reduction-item .red-date { color: #aaa; font-size: 10px; }
+
+        /* Section divider */
+        .section-divider {
+            border: none;
+            border-top: 1.5px dashed #eee;
+            margin: 20px 0 10px;
+        }
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d5a27;
+            margin-bottom: 5px;
+        }
+
+        /* Reduce amount modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9000;
+        }
+        .modal-box {
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .modal-box h3 { color: #e67e22; margin: 0 0 16px; }
+        .modal-box label { display: block; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 4px; margin-top: 12px; }
+        .modal-box input, .modal-box textarea {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+        .modal-box textarea { resize: vertical; min-height: 70px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px; }
+        .btn-reduce { background: #e67e22; color: white; }
+        .btn-reduce:hover { background: #cf6d17; }
+        .btn-cancel-modal { background: #eee; color: #555; }
     </style>
 </head>
 <body>
+    <!-- Reduce Amount Modal -->
+    <div class="modal-overlay" id="reduceModal">
+        <div class="modal-box">
+            <h3>✂️ Reduce Survey Amount</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:8px;">Set the new agreed amount for this survey. A reduction history entry will be saved automatically.</p>
+            <label>Current Amount</label>
+            <input type="text" id="reduceCurrentAmt" readonly style="background:#f5f5f5; color:#888;">
+            <label>New Reduced Amount (₹)</label>
+            <input type="number" id="reduceNewAmt" placeholder="Enter new amount" step="1" min="0">
+            <label>Reason for Reduction *</label>
+            <textarea id="reduceReason" placeholder="e.g., Client negotiation, measurement error, goodwill discount..."></textarea>
+            <div class="modal-btns">
+                <button class="btn-reduce" onclick="submitReduction()">Apply Reduction</button>
+                <button class="btn-cancel-modal" onclick="closeReduceModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div class="form_wrapper">
         <div class="form_box">
-            <h2 id="formTitle">Enter Payment Details</h2>
+            <h2 id="formTitle">💳 Enter Payment Details</h2>
             <form id="paymentDataForm">
 
                 <label class="field-label">Linked Survey</label>
-                <input type="text" id="survey_search" list="survey_suggestions" placeholder="Loading surveys..." autocomplete="off" required>
-                <datalist id="survey_suggestions"></datalist>
+                <div class="search-container">
+                    <input type="text" id="survey_search" placeholder="Search by Client Name or Location..." autocomplete="off" required>
+                    <div id="search_results" class="search-results"></div>
+                </div>
+
+                <!-- Balance Dashboard (shown once survey is selected) -->
+                <div class="balance-dashboard" id="balance_dashboard">
+                    <div class="title">💰 Payment Overview</div>
+                    <div class="balance-grid">
+                        <div class="balance-item">
+                            <div class="label">Survey Amount</div>
+                            <div class="amount total" id="dash_total">₹0</div>
+                        </div>
+                        <div class="balance-item">
+                            <div class="label">Paid So Far</div>
+                            <div class="amount paid" id="dash_paid">₹0</div>
+                        </div>
+                        <div class="balance-item">
+                            <div class="label">Balance Due</div>
+                            <div class="amount due" id="dash_balance">₹0</div>
+                        </div>
+                    </div>
+                    <div class="balance-bar-outer">
+                        <div class="balance-bar-fill" id="balance_bar" style="width:0%"></div>
+                    </div>
+                    <div class="balance-meta">
+                        <span id="dash_installments">0 installments</span>
+                        <span id="dash_percent">0% paid</span>
+                    </div>
+                    <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+                        <button type="button" onclick="openReduceModal()" style="background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); padding:7px 14px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:700;">✂️ Reduce Amount</button>
+                        <button type="button" onclick="viewAmountHistory()" style="background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); padding:7px 14px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:700;">📜 Reduction History</button>
+                    </div>
+                </div>
+
+                <!-- Amount Reduction History Panel -->
+                <div class="amount-history-panel" id="amount_history_panel">
+                    <div class="panel-title">📉 Amount Reduction History</div>
+                    <div id="amount_history_list">No reductions recorded.</div>
+                </div>
+
+                <hr class="section-divider">
+                <div class="section-title">📋 Set / Update Survey Amount</div>
+                <p style="font-size:12px; color:#888; margin:0 0 8px;">Set the agreed amount the customer must pay for this survey. This can be updated anytime.</p>
+
+                <label class="field-label">Survey Total Amount (₹)</label>
+                <input type="number" id="survey_amount" step="1" min="0" placeholder="₹ Total agreed amount for this survey">
+
+                <hr class="section-divider">
+                <div class="section-title">💸 Record a Payment Installment</div>
 
                 <label class="field-label">Quotation Date</label>
                 <input type="date" id="quotation_date" required>
@@ -104,7 +329,13 @@
                 <label class="field-label">Amount Received Date</label>
                 <input type="date" id="received_date" required>
 
-                <label class="field-label">Amount Received On</label>
+                <label class="field-label">Amount Paid This Installment (₹)</label>
+                <input type="number" id="initial_amount" step="1" min="0" required placeholder="₹ Amount paid now">
+
+                <label class="field-label">Discount / Reduction Applied (₹)</label>
+                <input type="number" id="amount_reduction" step="1" min="0" value="0" placeholder="₹ 0 if none">
+
+                <label class="field-label">Payment Method</label>
                 <select id="received_on" required>
                     <option value="" disabled selected>Select payment method</option>
                     <option value="cash">Cash</option>
@@ -125,22 +356,41 @@
 
     <script>
         let allLoadedSurveys = [];
+        let selectedSurveyId = null;
+        let currentSurveyAmount = 0;
+        let currentTotalPaid = 0;
+
         async function loadSurveys() {
             try {
                 const userEmail = localStorage.getItem('regEmail');
                 const response = await authorizedFetch(`/api/surveys?email=${userEmail}`);
-                const dl = document.getElementById('survey_suggestions');
+                const resultsDiv = document.getElementById('search_results');
                 const inp = document.getElementById('survey_search');
                 
                 if (response.ok) {
                     allLoadedSurveys = await response.json();
-                    dl.innerHTML = '';
-                    allLoadedSurveys.forEach(survey => {
-                        const option = document.createElement('option');
-                        option.value = `${survey.cli || 'Unknown Client'} - ${survey.loc || 'Unknown Loc'} (${survey.date || ''})`;
-                        dl.appendChild(option);
+                    inp.placeholder = "Search by Client Name or Location...";
+                    
+                    inp.addEventListener('input', () => {
+                        const val = inp.value.trim().toLowerCase();
+                        if (val === '') {
+                            selectedSurveyId = null;
+                            inp.classList.remove('selected-survey');
+                            document.getElementById('balance_dashboard').style.display = 'none';
+                            document.getElementById('amount_history_panel').style.display = 'none';
+                        }
+                        renderSearchResults(val);
                     });
-                    inp.placeholder = "Type name or location to search...";
+
+                    inp.addEventListener('focus', () => {
+                        if (inp.value.trim()) renderSearchResults(inp.value.trim().toLowerCase());
+                    });
+
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.search-container')) {
+                            resultsDiv.style.display = 'none';
+                        }
+                    });
                 } else {
                     inp.placeholder = "Failed to load surveys";
                 }
@@ -149,19 +399,221 @@
             }
         }
 
+        function renderSearchResults(query) {
+            const resultsDiv = document.getElementById('search_results');
+            if (!query) { resultsDiv.style.display = 'none'; return; }
+
+            const filtered = allLoadedSurveys.filter(s => 
+                (s.cli || '').toLowerCase().includes(query) || 
+                (s.loc || '').toLowerCase().includes(query)
+            ).slice(0, 8);
+
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-result-item" style="color:#999; cursor:default; font-size:12px; text-align:center;">No matching surveys found</div>';
+                resultsDiv.style.display = 'block';
+                return;
+            }
+
+            resultsDiv.innerHTML = filtered.map(s => `
+                <div class="search-result-item" onclick="selectSurvey('${s.id}', '${(s.cli||'').replace(/'/g,"\\'")}', '${(s.loc||'').replace(/'/g,"\\'")}', '${s.date||''}')">
+                    <span class="result-title">${(s.cli || 'Unknown').toUpperCase()}</span>
+                    <div class="result-details">
+                        <span>📍 ${s.loc || 'N/A'}</span>
+                        <span>📅 ${s.date || ''}</span>
+                    </div>
+                </div>
+            `).join('');
+            resultsDiv.style.display = 'block';
+        }
+
+        function selectSurvey(id, name, loc, date) {
+            selectedSurveyId = id;
+            const inp = document.getElementById('survey_search');
+            inp.value = name.toUpperCase();
+            inp.classList.add('selected-survey');
+            document.getElementById('search_results').style.display = 'none';
+            fetchPaymentSummary(id);
+        }
+
+        async function fetchPaymentSummary(sId) {
+            const dashboard = document.getElementById('balance_dashboard');
+            try {
+                const res = await authorizedFetch(`/api/payments/history/${sId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    // New API returns object with history, surveyAmount, totalPaid, balance
+                    const history = data.history || data; // backward compat
+                    const surveyAmount = data.surveyAmount || 0;
+                    const totalPaid = data.totalPaid || 0;
+                    const balance = data.balance || 0;
+                    const installments = Array.isArray(history) ? history.length : 0;
+
+                    currentSurveyAmount = surveyAmount;
+                    currentTotalPaid = totalPaid;
+
+                    // Update dashboard
+                    document.getElementById('dash_total').textContent = '₹' + surveyAmount.toLocaleString();
+                    document.getElementById('dash_paid').textContent = '₹' + totalPaid.toLocaleString();
+                    document.getElementById('dash_balance').textContent = '₹' + balance.toLocaleString();
+                    document.getElementById('dash_installments').textContent = installments + ' installment' + (installments !== 1 ? 's' : '');
+
+                    const pct = surveyAmount > 0 ? Math.min(100, Math.round((totalPaid / surveyAmount) * 100)) : 0;
+                    document.getElementById('balance_bar').style.width = pct + '%';
+                    document.getElementById('dash_percent').textContent = pct + '% paid';
+
+                    // Pre-fill survey amount field
+                    if (surveyAmount > 0) {
+                        document.getElementById('survey_amount').value = surveyAmount;
+                        document.getElementById('reduceCurrentAmt').value = '₹' + surveyAmount.toLocaleString();
+                    }
+
+                    dashboard.style.display = 'block';
+                    document.getElementById('amount_history_panel').style.display = 'none';
+
+                    // Prefill dates from latest payment
+                    if (Array.isArray(history) && history.length > 0) {
+                        const latest = history[history.length - 1];
+                        if (latest.quotationDate) document.getElementById('quotation_date').value = latest.quotationDate;
+                        if (latest.okDate) document.getElementById('ok_date').value = latest.okDate;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function viewAmountHistory() {
+            const panel = document.getElementById('amount_history_panel');
+            const list  = document.getElementById('amount_history_list');
+            list.innerHTML = '<p style="color:#888; font-size:13px;">Loading...</p>';
+            panel.style.display = 'block';
+
+            try {
+                // Fetch both reductions and payment installments in parallel
+                const [redRes, payRes] = await Promise.all([
+                    authorizedFetch(`/api/surveys/${selectedSurveyId}/amount-history`),
+                    authorizedFetch(`/api/payments/history/${selectedSurveyId}`)
+                ]);
+
+                const redData = redRes.ok ? await redRes.json() : { history: [] };
+                const payData = payRes.ok ? await payRes.json() : { history: [] };
+
+                const reductions   = (redData.history || []).map(r => ({ ...r, _type: 'reduction' }));
+                const installments = (payData.history || []).map(p => ({ ...p, _type: 'payment' }));
+
+                // Merge and sort by date ascending
+                const combined = [...reductions, ...installments].sort((a, b) =>
+                    new Date(a.createdAt) - new Date(b.createdAt)
+                );
+
+                if (combined.length === 0) {
+                    list.innerHTML = '<p style="color:#aaa; font-size:12px; text-align:center; padding:8px 0;">No history recorded yet.</p>';
+                    return;
+                }
+
+                const methodIcon = { cash: '💵', cheque: '📄', rtgs: '🏦', gpay: '📱' };
+
+                list.innerHTML = combined.map(item => {
+                    if (item._type === 'payment') {
+                        // — Installment row (green)
+                        const icon = methodIcon[item.receivedOn] || '💳';
+                        const discount = (item.amountReduction > 0)
+                            ? `<span style="font-size:10px; color:#e74c3c; margin-left:6px;">-₹${Number(item.amountReduction).toLocaleString()} disc.</span>`
+                            : '';
+                        return `
+                        <div class="reduction-item" style="border-left: 3px solid #2ecc71; padding-left:10px; margin-left:-10px;">
+                            <div class="red-info">
+                                <div style="font-weight:700; color:#27ae60; font-size:13px;">
+                                    ${icon} Installment Paid: ₹${Number(item.initialAmountPaid||0).toLocaleString()}${discount}
+                                </div>
+                                <div style="color:#888; font-size:11px; margin-top:2px;">
+                                    via ${(item.receivedOn||'cash').toUpperCase()} • Received: ${item.receivedDate || '—'}
+                                </div>
+                                <div class="red-date">${item.createdBy || ''} • ${new Date(item.createdAt).toLocaleString()}</div>
+                            </div>
+                            <div style="font-size:15px; font-weight:800; color:#27ae60;">+₹${Number(item.initialAmountPaid||0).toLocaleString()}</div>
+                        </div>`;
+                    } else {
+                        // — Reduction row (red)
+                        return `
+                        <div class="reduction-item" style="border-left: 3px solid #e74c3c; padding-left:10px; margin-left:-10px;">
+                            <div class="red-info">
+                                <div style="font-weight:700; color:#c0392b; font-size:13px;">
+                                    ✂️ Amount Reduced: ₹${Number(item.oldAmount||0).toLocaleString()} → ₹${Number(item.newAmount||0).toLocaleString()}
+                                </div>
+                                <div style="color:#888; font-size:11px; margin-top:2px;">${item.reason || 'No reason given'}</div>
+                                <div class="red-date">${item.reducedBy || ''} • ${new Date(item.createdAt).toLocaleString()}</div>
+                            </div>
+                            <div class="red-amount">-₹${Number(item.reductionAmount||0).toLocaleString()}</div>
+                        </div>`;
+                    }
+                }).join('');
+
+            } catch (err) {
+                list.innerHTML = '<p style="color:#e74c3c; font-size:12px;">Failed to load history.</p>';
+            }
+        }
+
+        // --- Reduce Amount Modal ---
+        function openReduceModal() {
+            if (!selectedSurveyId) { alert("Please select a survey first."); return; }
+            document.getElementById('reduceCurrentAmt').value = '₹' + currentSurveyAmount.toLocaleString();
+            document.getElementById('reduceNewAmt').value = '';
+            document.getElementById('reduceReason').value = '';
+            document.getElementById('reduceModal').style.display = 'flex';
+        }
+
+        function closeReduceModal() {
+            document.getElementById('reduceModal').style.display = 'none';
+        }
+
+        async function submitReduction() {
+            const newAmt = parseFloat(document.getElementById('reduceNewAmt').value);
+            const reason = document.getElementById('reduceReason').value.trim();
+            const userEmail = localStorage.getItem('regEmail');
+
+            if (isNaN(newAmt) || newAmt < 0) { alert("Please enter a valid new amount."); return; }
+            if (!reason) { alert("Please enter a reason for the reduction."); return; }
+
+            try {
+                const res = await authorizedFetch(`/api/surveys/${selectedSurveyId}/reduce-amount`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newAmount: newAmt, reason: reason, reducedBy: userEmail })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('✅ ' + data.message);
+                    closeReduceModal();
+                    fetchPaymentSummary(selectedSurveyId);
+                } else {
+                    alert('❌ ' + (data.message || 'Failed to reduce amount'));
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
+            }
+        }
+
         async function savePayment() {
-            const searchValue = document.getElementById('survey_search').value;
-            const matchedSurvey = allLoadedSurveys.find(s => `${s.cli || 'Unknown Client'} - ${s.loc || 'Unknown Loc'} (${s.date || ''})` === searchValue);
-            const sId = matchedSurvey ? matchedSurvey.id : null;
+            const sId = selectedSurveyId;
+            
+            if (!sId) {
+                alert("Please select a survey from the search results first.");
+                document.getElementById('survey_search').focus();
+                return;
+            }
             
             const qDate = document.getElementById('quotation_date').value;
             const oDate = document.getElementById('ok_date').value;
             const rDate = document.getElementById('received_date').value;
+            const initialAmount = document.getElementById('initial_amount').value;
+            const amountReduction = document.getElementById('amount_reduction').value || '0';
             const rOn = document.getElementById('received_on').value;
             const userEmail = localStorage.getItem('regEmail');
+            const surveyAmount = document.getElementById('survey_amount').value;
 
-            if (!sId || !qDate || !oDate || !rDate || !rOn) {
-                alert("Please select a valid survey from the suggestions and fill in all required payment fields.");
+            if (!sId || !qDate || !oDate || !rDate || !rOn || !initialAmount) {
+                alert("Please select a valid survey and fill all required fields (dates, amount, method).");
                 return;
             }
 
@@ -171,6 +623,9 @@
                 okDate: oDate,
                 receivedDate: rDate,
                 receivedOn: rOn,
+                initialAmountPaid: initialAmount,
+                amountReduction: amountReduction,
+                surveyAmount: surveyAmount || null,
                 createdBy: userEmail
             };
 
@@ -186,7 +641,7 @@
                 });
                 
                 if (response.ok) {
-                    alert('✨ Payment details saved successfully!');
+                    alert('✨ Payment installment saved successfully!');
                     window.location.href = 'home.html';
                 } else {
                     const err = await response.json();
@@ -208,12 +663,12 @@
             if (localStorage.getItem('darkMode') === 'enabled') {
                 document.body.classList.add('dark_theme');
                 const formBox = document.querySelector('.form_box');
-                if(formBox) {
+                if (formBox) {
                     formBox.style.background = '#1a1a1a';
                     formBox.style.color = 'white';
                     const title = formBox.querySelector('h2');
-                    if(title) title.style.color = '#fff';
-                    const inputs = formBox.querySelectorAll('input, select');
+                    if (title) title.style.color = '#fff';
+                    const inputs = formBox.querySelectorAll('input, select, textarea');
                     inputs.forEach(input => {
                         input.style.background = '#2c2c2c';
                         input.style.color = '#fff';

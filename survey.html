@@ -43,7 +43,7 @@
         .horizontal_box {
             background: white;
             display: grid;
-            grid-template-columns: repeat(6, 1fr) auto; 
+            grid-template-columns: repeat(7, 1fr) auto; 
             align-items: center;
             padding: 20px;
             border-radius: 15px;
@@ -178,6 +178,18 @@
         </div>
     </div>
 
+    <!-- Payment History Modal -->
+    <div class="token-modal-overlay" id="paymentModal">
+        <div class="token-modal" style="max-width: 500px;">
+            <h3 style="color: #2ecc71;">💰 Payment Installment Log</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">History of all payments received for this survey.</p>
+            <div id="paymentHistoryList" style="max-height: 400px; overflow-y: auto;">
+                <p style="text-align:center; color:#888;">Loading installments...</p>
+            </div>
+            <button type="button" onclick="document.getElementById('paymentModal').style.display='none'" style="width: 100%; background: #eee; color: #555; margin-top: 20px; border: none; padding: 12px; border-radius: 10px; cursor: pointer;">Close History</button>
+        </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div class="token-modal-overlay" id="deleteModal">
         <div class="token-modal" style="max-width: 400px;">
@@ -190,7 +202,7 @@
             </div>
             <div class="token-form-group" style="margin-top: 10px;">
                 <label style="color:#e74c3c;">MASTER PASSWORD (Required)</label>
-                <input type="password" id="delete_password" required placeholder="••••••••">
+                <input type="password" id="delete_password" required placeholder="Enter your password">
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button type="button" id="deleteConfirmBtn" onclick="confirmDeletion()" style="flex: 1; background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition:0.3s;">Archive & Delete</button>
@@ -213,6 +225,7 @@
                 <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
                 <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
                 <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
+                <a href="history.html" id="historyLink" class="menu-item" style="display:none;"><span>🗂️</span> Deleted Archive</a>
                 <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
 
                 <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
@@ -252,11 +265,12 @@
 
         window.onload = async function() {
             document.getElementById("displayCompany").innerText = localStorage.getItem("regCompany") || "B.K Builders";
-            if (userRole === "Admin") {
+            if (userRole === "Admin" || userRole === "Owner") {
                 document.getElementById("adminLink").style.display = "block";
                 if (document.getElementById("workerLink")) document.getElementById("workerLink").style.display = "block";
                 if (document.getElementById("ticketLink")) document.getElementById("ticketLink").style.display = "block";
                 if (document.getElementById("msgLink")) document.getElementById("msgLink").style.display = "block";
+                if (document.getElementById("historyLink")) document.getElementById("historyLink").style.display = "block";
             }
             
             loadSavedLogo();
@@ -305,16 +319,22 @@
                     </div>` : 
                     `<div class="data_field"><span class="label_text">Received File</span><span class="value_text" style="color:#ccc;">No File</span></div>`;
 
-                const editBtn = (userRole === 'Admin') ? 
-                    `<div class="data_field" style="border:none">
-                        <a onclick="editRecord('${item.id}')" class="edit-badge">Edit</a>
-                        <a onclick="showHistory(${item.id})" class="edit-badge" style="margin-left:5px; background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>
-                        <a onclick="exportSingleToExcel(${item.id})" class="edit-badge" style="margin-top:5px; background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
-                        <a onclick="initiateDelete(${item.id})" class="edit-badge" style="margin-top:5px; margin-left:5px; background:#fff0f0; color:#e74c3c; border-color:#e74c3c;">🗑️ Delete</a>
-                    </div>` : 
-                    `<div class="data_field" style="border:none">
-                        <a onclick="openTokenModal(${item.id})" class="edit-badge" style="background:#fff7e6; color:#d68910; border-color:#d68910;">🎫 Book Ticket</a>
-                        <a onclick="exportSingleToExcel(${item.id})" class="edit-badge" style="margin-top:5px; background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
+                const isAdmin = (userRole === 'Admin' || userRole === 'Owner');
+                const isCreator = (userEmail === item.createdBy);
+
+                const actionButtons = isAdmin ? 
+                    `<a onclick="editRecord('${item.id}')" class="edit-badge">Edit</a>
+                     <a onclick="showHistory('${item.id}')" class="edit-badge" style="margin-left:5px; background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>` :
+                    `<a onclick="openTokenModal('${item.id}')" class="edit-badge" style="background:#fff7e6; color:#d68910; border-color:#d68910;">🎫 Book Ticket</a>`;
+
+                const deleteBtn = (isAdmin || isCreator) ? 
+                    `<a onclick="initiateDelete('${item.id}')" class="edit-badge" style="margin-top:5px; margin-left:5px; background:#fff0f0; color:#e74c3c; border-color:#e74c3c;">🗑️ Delete</a>` : '';
+
+                const editBtn = `
+                    <div class="data_field" style="border:none">
+                        ${actionButtons}
+                        <a onclick="exportSingleToExcel('${item.id}')" class="edit-badge" style="margin-top:5px; background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
+                        ${deleteBtn}
                     </div>`;
 
                 box.innerHTML = `
@@ -336,9 +356,25 @@
                         <span class="label_text">Size</span>
                         <span class="value_text">${item.size}</span>
                     </div>
+                    
+                    <div class="data_field" style="cursor:pointer;" onclick="showPaymentHistory('${item.id}')">
+                        <span class="label_text">💰 Payment Log</span>
+                        <span class="value_text" style="color:${item.paymentSummary.installments > 0 ? '#2ecc71' : '#ccc'}; font-weight:700;">
+                            ${item.paymentSummary.installments > 0 ? '₹' + item.paymentSummary.totalPaid.toLocaleString() : 'No Payments'}
+                        </span>
+                        ${item.paymentSummary.installments > 0 ? `<span style="font-size:9px; color:#888;">(${item.paymentSummary.installments} inst.)</span>` : ''}
+                        ${item.surveyAmount > 0 ? `<span style="font-size:9px; color:${(item.surveyAmount - item.paymentSummary.totalPaid) > 0 ? '#e74c3c' : '#2ecc71'};">
+                            ${(item.surveyAmount - item.paymentSummary.totalPaid) > 0 ? 'Bal: ₹' + (item.surveyAmount - item.paymentSummary.totalPaid).toLocaleString() : '✅ Cleared'}
+                        </span>` : ''}
+                    </div>
+
                     <div class="data_field">
                         <span class="label_text">Area</span>
                         <span class="value_text">${item.area}</span>
+                    </div>
+                    <div class="data_field">
+                        <span class="label_text">Surveyed By</span>
+                        <span class="value_text" style="color:#3498db;">${item.emp || 'N/A'}</span>
                     </div>
                     ${editBtn}
                 `;
@@ -547,6 +583,62 @@
             document.getElementById('delete_reason').value = '';
             document.getElementById('delete_password').value = '';
             document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        async function showPaymentHistory(id) {
+            const list = document.getElementById('paymentHistoryList');
+            list.innerHTML = '<p style="text-align:center;">Loading installment history...</p>';
+            document.getElementById('paymentModal').style.display = 'flex';
+            
+            try {
+                const res = await authorizedFetch(`/api/payments/history/${id}`);
+                const data = await res.json();
+                // Support both new {history,surveyAmount,...} and legacy array formats
+                const history = Array.isArray(data) ? data : (data.history || []);
+                const surveyAmount = data.surveyAmount || 0;
+                const totalPaid = data.totalPaid || history.reduce((s,p)=>s+(p.initialAmountPaid||0),0);
+                const balance = data.balance || Math.max(0, surveyAmount - totalPaid);
+                
+                if (history.length === 0 && surveyAmount === 0) {
+                    list.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">No payments recorded for this survey yet.</p>';
+                    return;
+                }
+
+                // Summary header
+                let summaryHtml = '';
+                if (surveyAmount > 0) {
+                    const pct = Math.min(100, Math.round((totalPaid/surveyAmount)*100));
+                    summaryHtml = `
+                        <div style="background:linear-gradient(135deg,#1a3a17,#2d5a27); border-radius:12px; padding:14px; color:white; margin-bottom:14px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; text-align:center;">
+                                <div><div style="font-size:9px;opacity:0.7;">AGREED AMT</div><div style="font-size:15px;font-weight:800;">₹${surveyAmount.toLocaleString()}</div></div>
+                                <div><div style="font-size:9px;opacity:0.7;">PAID</div><div style="font-size:15px;font-weight:800;color:#2ecc71;">₹${totalPaid.toLocaleString()}</div></div>
+                                <div><div style="font-size:9px;opacity:0.7;">BALANCE</div><div style="font-size:15px;font-weight:800;color:${balance>0?'#f39c12':'#2ecc71'};">₹${balance.toLocaleString()}</div></div>
+                            </div>
+                            <div style="margin-top:10px; background:rgba(255,255,255,0.2); border-radius:10px; height:6px; overflow:hidden;">
+                                <div style="width:${pct}%; height:100%; background:#2ecc71; border-radius:10px;"></div>
+                            </div>
+                            <div style="font-size:10px;opacity:0.6;margin-top:4px;text-align:right;">${pct}% paid</div>
+                        </div>`;
+                }
+                
+                list.innerHTML = summaryHtml + (history.length === 0 ? '<p style="text-align:center;padding:10px;color:#999;font-size:12px;">No installments recorded yet.</p>' :
+                    history.slice().reverse().map(p => `
+                    <div style="border-bottom:1px solid #eee; padding:14px 0; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:14px; font-weight:700; color:#2d5a27;">₹${(p.initialAmountPaid || 0).toLocaleString()}</div>
+                            <div style="font-size:11px; color:#888;">via ${p.receivedOn || 'Cash'}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:11px; color:#444;">${p.receivedDate ? new Date(p.receivedDate).toLocaleDateString() : ''}</div>
+                            ${(p.amountReduction > 0) ? `<div style="font-size:9px; color:#e74c3c;">Discount: ₹${p.amountReduction}</div>` : ''}
+                        </div>
+                    </div>
+                `).join(''));
+                
+            } catch (err) {
+                list.innerHTML = '<p style="text-align:center; color:#e74c3c;">Failed to load payments.</p>';
+            }
         }
 
         function closeDeleteModal() {
