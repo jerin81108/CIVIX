@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "firebase": "^12.11.0"
+    "express": "^5.2.1",
+    "firebase": "^12.11.0",
+    "netlify-cli": "^26.0.0",
+    "netlify-lambda": "^2.0.16",
+    "serverless-http": "^4.0.0"
   }
 }
