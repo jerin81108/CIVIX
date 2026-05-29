@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /index.html
+Allow: /contact.html
+Allow: /style.css
+Allow: /home_style.css
+Disallow: /*_log.txt$
+Disallow: /*.py$
+Disallow: /admin.html
+Disallow: /login.html
+Disallow: /messages.html
+Disallow: /payment.html
+Disallow: /profile.html
+Disallow: /registration.html
+Disallow: /settings.html
+Disallow: /survey.html
+Disallow: /survey_form.html
+Disallow: /survey_log.html
+Disallow: /tickets.html
+Disallow: /workers.html
+Disallow: /home.html
+Disallow: /about.html
+Disallow: /history.html
+Disallow: /server/
+Disallow: /.venv/
+Disallow: /node_modules/
+
+Sitemap: https://yourdomain.com/sitemap.xml

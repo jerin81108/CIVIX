@@ -1,0 +1,9 @@
+flask
+flask-cors
+pymongo
+dnspython
+firebase-admin
+python-dotenv
+gunicorn
+werkzeug
+bcrypt

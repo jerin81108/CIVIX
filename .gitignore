@@ -13,7 +13,6 @@ __pycache__/
 server/civix.db
 
 # Temp/debug files
-*.txt
 firebase-debug.log
 server/output.txt
 
