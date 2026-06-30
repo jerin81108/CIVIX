@@ -164,19 +164,14 @@
                 <h3 id="displayCompany">B.K Builders</h3>
             </div>
             <nav class="menu">
-                <a href="home.html"    class="menu-item"><span>🏠</span> Home</a>
-                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
-                <a href="survey.html"  class="menu-item"><span>📊</span> Survey Logs</a>
+                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
+                <a href="survey.html" class="menu-item active"><span>📊</span> Survey Logs</a>
                 <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
-                <a href="messages.html"  id="msgLink"    class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
-                <a href="tickets.html"   id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
-                <a href="workers.html"   id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
-                <a href="history.html"   class="menu-item active"><span>🗂️</span> Deleted Archive</a>
-                <a href="about.html"   class="menu-item"><span>✨</span> About Creator</a>
-                <a href="admin.html"   id="adminLink" class="menu-item" style="display:none;"><span>🛡️</span> Admin Dashboard</a>
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
+                <a href="settings.html" class="menu-item"><span>⚙️</span> Settings</a>
             </nav>
             <div class="sidebar-footer">
-                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+                <button onclick="handleLogout()" class="logout-btn">Logout</button>
             </div>
         </aside>
 
@@ -187,6 +182,13 @@
                     <p style="font-size:13px; color:#888; margin:0;">Securely stored records of all deleted surveys — for future reference.</p>
                 </div>
             </header>
+
+            <!-- Sub-navigation for Survey Log sub-pages -->
+            <div class="sub-nav-container" style="display: flex; gap: 15px; margin: 15px 0 25px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); backdrop-filter: blur(10px);">
+                <a href="survey.html" class="sub-nav-item" style="font-weight: 600; color: #666; text-decoration: none; padding: 8px 16px; border-radius: 6px; transition: 0.2s;">📋 Active Logs</a>
+                <a href="tickets.html" class="sub-nav-item" style="font-weight: 600; color: #666; text-decoration: none; padding: 8px 16px; transition: 0.2s; border-radius: 6px;">🎫 Change Requests</a>
+                <a href="history.html" class="sub-nav-item active" style="font-weight: 700; color: #2d5a27; text-decoration: none; border-bottom: 3.5px solid #2d5a27; padding: 8px 16px; border-radius: 6px; background: rgba(45, 90, 39, 0.08); transition: 0.2s;">🗂️ Deleted Archive</a>
+            </div>
 
             <!-- Stats -->
             <div class="stats-bar" id="statsBar" style="display:none;">
@@ -243,7 +245,7 @@
             loadSavedLogo();
 
             // Show admin-only links
-            ['adminLink','workerLink','ticketLink','msgLink'].forEach(id => {
+            ['adminLink'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'block';
             });

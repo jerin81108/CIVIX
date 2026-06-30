@@ -190,6 +190,9 @@
                 <label class="field-label">Surveyed By (Employee)</label>
                 <input type="text" id="employee" placeholder="Employee name" required>
 
+                <label class="field-label">Company Name</label>
+                <input type="text" id="company_name" placeholder="Company name" required>
+
                 <label class="field-label">Client Name</label>
                 <input type="text" id="client" placeholder="Customer / client name" required>
 
@@ -216,14 +219,17 @@
                     </div>
                 </div>
 
-                <label class="field-label" style="margin-top:18px;">Attach File <span style="font-weight:400; color:#bbb;">(Optional)</span></label>
-                <input type="file" id="survey_file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                <label class="field-label" style="margin-top:14px;">Finishing Date</label>
+                <input type="date" id="finishing_date" required>
+
+                <label class="field-label" style="margin-top:18px;">Attach Files <span style="font-weight:400; color:#bbb;">(Optional, multiple allowed)</span></label>
+                <input type="file" id="survey_file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple>
                 <p class="file-note">Accepted: PDF, JPG, PNG, DOC, DOCX</p>
 
                 <button type="button" class="submit_btn" id="submitBtn" onclick="saveAndUpload()">
                     Upload Survey
                 </button>
-                <button type="button" class="cancel_btn" onclick="window.history.back()">
+                <button type="button" class="cancel_btn" onclick="handleBack()">
                     Cancel
                 </button>
             </form>
@@ -265,6 +271,10 @@
 
         // On load — handle edit mode
         window.onload = async function() {
+            // Pre-fill Company Name for new entries
+            const savedCompany = localStorage.getItem("regCompany") || localStorage.getItem("registeredCompany") || "";
+            document.getElementById('company_name').value = savedCompany;
+
             if (editId) {
                 // Edit mode: hide type toggle, just show form
                 document.getElementById('typeToggle').style.display = 'none';
@@ -281,6 +291,8 @@
                         document.getElementById('place_size').value  = data.size   || '';
                         document.getElementById('location').value    = data.loc    || '';
                         document.getElementById('employee').value    = data.emp    || '';
+                        document.getElementById('company_name').value = data.company || '';
+                        document.getElementById('finishing_date').value = data.finishingDate || '';
                         document.getElementById('client').value      = data.cli    || '';
                         document.getElementById('client_num').value  = data.cliNum || '';
                         document.getElementById('area').value        = data.area   || '';
@@ -315,20 +327,31 @@
                 finalTime = now.toLocaleTimeString('en-IN');           // HH:MM:SS
             }
 
+            const finishingDate = document.getElementById('finishing_date').value;
+            if (!finishingDate) {
+                alert('Please pick the finishing date.');
+                document.getElementById('finishing_date').focus();
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('size',      document.getElementById('place_size').value);
-            formData.append('loc',       document.getElementById('location').value);
-            formData.append('emp',       document.getElementById('employee').value);
-            formData.append('cli',       document.getElementById('client').value);
-            formData.append('cliNum',    document.getElementById('client_num').value);
-            formData.append('area',      document.getElementById('area').value);
-            formData.append('date',      finalDate);
-            formData.append('time',      finalTime);
-            formData.append('createdBy', userEmail);
+            formData.append('size',          document.getElementById('place_size').value);
+            formData.append('loc',           document.getElementById('location').value);
+            formData.append('emp',           document.getElementById('employee').value);
+            formData.append('company',       document.getElementById('company_name').value);
+            formData.append('finishingDate', finishingDate);
+            formData.append('cli',           document.getElementById('client').value);
+            formData.append('cliNum',        document.getElementById('client_num').value);
+            formData.append('area',          document.getElementById('area').value);
+            formData.append('date',          finalDate);
+            formData.append('time',          finalTime);
+            formData.append('createdBy',     userEmail);
             if (editId) formData.append('updatedBy', userEmail);
 
             if (fileInput.files.length > 0) {
-                formData.append('file', fileInput.files[0]);
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('files', fileInput.files[i]);
+                }
             }
 
             const url    = editId ? `/api/surveys/${editId}` : '/api/surveys';

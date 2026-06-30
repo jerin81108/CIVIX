@@ -566,6 +566,167 @@ body.dark_theme .label, body.dark_theme .label_text, body.dark_theme .setting_de
     to { opacity: 1; }
 }
 
-/* Blueprint Overlay Removed */
+/* Dark Mode Enhancements for legibility & contrast */
+body.dark_theme, 
+body.dark_theme main, 
+body.dark_theme .main-content {
+    background-color: #0f172a !important; /* Premium dark blue-slate */
+    color: #f1f5f9 !important; /* Off-white for high legibility */
+}
 
-/* Dashboard Remnant Removed */
+body.dark_theme h1, 
+body.dark_theme h2, 
+body.dark_theme h3, 
+body.dark_theme h4, 
+body.dark_theme h5, 
+body.dark_theme h6,
+body.dark_theme .value,
+body.dark_theme .value_text,
+body.dark_theme .p-value,
+body.dark_theme .sf-value,
+body.dark_theme .s-val,
+body.dark_theme .card h3 {
+    color: #ffffff !important;
+}
+
+body.dark_theme p, 
+body.dark_theme span, 
+body.dark_theme li, 
+body.dark_theme td, 
+body.dark_theme th,
+body.dark_theme label,
+body.dark_theme .label,
+body.dark_theme .label_text,
+body.dark_theme .p-label,
+body.dark_theme .sf-label,
+body.dark_theme .s-lbl,
+body.dark_theme .setting_desc,
+body.dark_theme .meta-item,
+body.dark_theme .card p,
+body.dark_theme .fact_text {
+    color: #cbd5e1 !important; /* Soft, highly legible light gray */
+}
+
+/* Sidebar in Dark Mode */
+body.dark_theme .sidebar {
+    background-color: #020617 !important;
+    border-right: 1px solid #1e293b !important;
+}
+body.dark_theme .menu-item {
+    color: #94a3b8 !important;
+}
+body.dark_theme .menu-item:hover,
+body.dark_theme .menu-item.active {
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.08) !important;
+}
+
+/* Card and Container Backgrounds in Dark Mode */
+body.dark_theme .card, 
+body.dark_theme .settings_card, 
+body.dark_theme .profile-card, 
+body.dark_theme .horizontal_box,
+body.dark_theme .msg-card,
+body.dark_theme .ticket-card,
+body.dark_theme .payment-stat,
+body.dark_theme .diff-box,
+body.dark_theme .stats-bar,
+body.dark_theme .stat-card,
+body.dark_theme .del-info,
+body.dark_theme table,
+body.dark_theme tr,
+body.dark_theme td,
+body.dark_theme .stat-card-glass {
+    background-color: #1e293b !important; /* High legibility dark gray-blue card */
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;
+}
+
+body.dark_theme .stat-card-glass:hover {
+    background-color: #334155 !important;
+}
+
+/* Sub-nav items */
+body.dark_theme .sub-nav-container {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid #334155 !important;
+}
+body.dark_theme .sub-nav-item {
+    color: #94a3b8 !important;
+}
+body.dark_theme .sub-nav-item.active {
+    color: #38bdf8 !important; /* Bright celestial blue */
+    background: rgba(56, 189, 248, 0.15) !important;
+    border-bottom: 3.5px solid #38bdf8 !important;
+}
+
+/* Link colors */
+body.dark_theme a,
+body.dark_theme .value_text a {
+    color: #38bdf8 !important;
+    text-decoration: underline;
+}
+body.dark_theme a:hover {
+    color: #7dd3fc !important;
+}
+
+/* Form inputs & interactive elements */
+body.dark_theme input,
+body.dark_theme select,
+body.dark_theme textarea {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    border: 1.5px solid #334155 !important;
+}
+body.dark_theme input:focus,
+body.dark_theme select:focus,
+body.dark_theme textarea:focus {
+    border-color: #38bdf8 !important;
+    outline: none;
+}
+body.dark_theme .search-header {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+body.dark_theme .search-header input {
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+/* Action Badges in Dark Mode */
+body.dark_theme .edit-badge {
+    background: #334155 !important;
+    border: 1px solid #475569 !important;
+    color: #f1f5f9 !important;
+}
+body.dark_theme .edit-badge:hover {
+    background: #475569 !important;
+    color: #ffffff !important;
+}
+
+/* ========================================================
+   SECURITY CONTROLS: Anti-Copy & Anti-Print 
+   ======================================================== */
+body {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+}
+
+/* Re-enable selection ONLY in input fields */
+input, textarea, select {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+/* Blank page on attempt to print */
+@media print {
+    body {
+        display: none !important;
+    }
+}

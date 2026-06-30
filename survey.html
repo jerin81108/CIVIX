@@ -219,19 +219,13 @@
             </div>
             <nav class="menu">
                 <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
-                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
                 <a href="survey.html" class="menu-item active"><span>📊</span> Survey Logs</a>
                 <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
-                <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest Messages</a>
-                <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change Requests</a>
-                <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers Directory</a>
-                <a href="history.html" id="historyLink" class="menu-item" style="display:none;"><span>🗂️</span> Deleted Archive</a>
-                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
-
                 <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
+                <a href="settings.html" class="menu-item"><span>⚙️</span> Settings</a>
             </nav>
             <div class="sidebar-footer">
-                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+                <button onclick="handleLogout()" class="logout-btn">Logout</button>
             </div>
         </aside>
 
@@ -245,6 +239,13 @@
                     <button onclick="location.href='survey_form.html'" class="save-btn" style="width: auto; padding: 12px 25px; background: var(--primary); color:white; border:none; border-radius:10px; cursor:pointer;">+ New Entry</button>
                 </div>
             </header>
+
+            <!-- Sub-navigation for Survey Log sub-pages -->
+            <div class="sub-nav-container" style="display: flex; gap: 15px; margin: 15px 0 25px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); backdrop-filter: blur(10px);">
+                <a href="survey.html" class="sub-nav-item active" style="font-weight: 700; color: #2d5a27; text-decoration: none; border-bottom: 3.5px solid #2d5a27; padding: 8px 16px; border-radius: 6px; background: rgba(45, 90, 39, 0.08); transition: 0.2s;">📋 Active Logs</a>
+                <a href="tickets.html" class="sub-nav-item" style="font-weight: 600; color: #666; text-decoration: none; padding: 8px 16px; transition: 0.2s; border-radius: 6px;">🎫 Change Requests</a>
+                <a href="history.html" class="sub-nav-item" style="font-weight: 600; color: #666; text-decoration: none; padding: 8px 16px; transition: 0.2s; border-radius: 6px;">🗂️ Deleted Archive</a>
+            </div>
 
             <div class="search-header">
                 <span class="search-icon">🔍</span>
@@ -311,40 +312,63 @@
                 const box = document.createElement('div');
                 box.className = "horizontal_box";
                 
-                const fileHtml = item.filePath ? 
-                    `<div class="data_field">
-                        <span class="label_text">Received File</span>
-                        <a href="${item.filePath}" target="_blank" class="value_text" style="color:#2d5a27; text-decoration:underline;">Reach It 📄</a>
-                        <span style="font-size:9px; color:#999; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80px;">${item.fileName}</span>
-                    </div>` : 
-                    `<div class="data_field"><span class="label_text">Received File</span><span class="value_text" style="color:#ccc;">No File</span></div>`;
+                let fileHtml = '';
+                if (item.files && item.files.length > 0) {
+                    const fileLinks = item.files.map((f, idx) => 
+                        `<div style="margin-bottom: 4px;">
+                            <a href="${f.path}" target="_blank" class="value_text" style="color:#2d5a27; text-decoration:underline; font-size:12px;">File ${idx+1} 📄</a>
+                            <span style="font-size:9px; color:#999; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;" title="${f.name}">${f.name}</span>
+                         </div>`
+                    ).join('');
+                    fileHtml = `
+                        <div class="data_field">
+                            <span class="label_text">Attached Files (${item.files.length})</span>
+                            <div style="max-height:80px; overflow-y:auto; padding-right:5px;">
+                                ${fileLinks}
+                            </div>
+                        </div>`;
+                } else if (item.filePath) {
+                    fileHtml = `
+                        <div class="data_field">
+                            <span class="label_text">Received File</span>
+                            <a href="${item.filePath}" target="_blank" class="value_text" style="color:#2d5a27; text-decoration:underline;">Reach It 📄</a>
+                            <span style="font-size:9px; color:#999; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${item.fileName}</span>
+                        </div>`;
+                } else {
+                    fileHtml = `<div class="data_field"><span class="label_text">Received File</span><span class="value_text" style="color:#ccc;">No File</span></div>`;
+                }
 
                 const isAdmin = (userRole === 'Admin' || userRole === 'Owner');
                 const isCreator = (userEmail === item.createdBy);
 
                 const actionButtons = isAdmin ? 
                     `<a onclick="editRecord('${item.id}')" class="edit-badge">Edit</a>
-                     <a onclick="showHistory('${item.id}')" class="edit-badge" style="margin-left:5px; background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>` :
+                     <a onclick="showHistory('${item.id}')" class="edit-badge" style="background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>` :
                     `<a onclick="openTokenModal('${item.id}')" class="edit-badge" style="background:#fff7e6; color:#d68910; border-color:#d68910;">🎫 Book Ticket</a>`;
 
                 const deleteBtn = (isAdmin || isCreator) ? 
-                    `<a onclick="initiateDelete('${item.id}')" class="edit-badge" style="margin-top:5px; margin-left:5px; background:#fff0f0; color:#e74c3c; border-color:#e74c3c;">🗑️ Delete</a>` : '';
+                    `<a onclick="initiateDelete('${item.id}')" class="edit-badge" style="background:#fff0f0; color:#e74c3c; border-color:#e74c3c;">🗑️ Delete</a>` : '';
 
                 const editBtn = `
-                    <div class="data_field" style="border:none">
-                        ${actionButtons}
-                        <a onclick="exportSingleToExcel('${item.id}')" class="edit-badge" style="margin-top:5px; background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
-                        ${deleteBtn}
+                    <div class="data_field" style="border:none; min-width: 250px;">
+                        <span class="label_text">Actions</span>
+                        <div style="display:flex; flex-direction:row; gap:6px; flex-wrap:wrap; margin-top:5px;">
+                            ${actionButtons}
+                            <a onclick="exportSingleToExcel('${item.id}')" class="edit-badge" style="background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
+                            ${deleteBtn}
+                        </div>
                     </div>`;
 
                 box.innerHTML = `
                     <div class="data_field">
                         <span class="label_text">Date & Time</span>
                         <span class="value_text">${item.date}<br>${item.time}</span>
+                        ${item.finishingDate ? `<span style="font-size:10px; color:#e67e22; font-weight:bold; display:block; margin-top:4px;">🏁 Finish: ${item.finishingDate}</span>` : ''}
                     </div>
                     <div class="data_field">
                         <span class="label_text">Client</span>
                         <span class="value_text">${item.cli}</span>
+                        ${item.company ? `<span style="font-size:11px; color:#2d5a27; font-weight:bold; display:block;">🏢 ${item.company}</span>` : ''}
                         <a href="tel:${item.cliNum}" style="font-size:11px; color:#666; text-decoration:none;">📞 ${item.cliNum || 'No Num'}</a>
                     </div>
                     <div class="data_field">
@@ -357,17 +381,34 @@
                         <span class="value_text">${item.size}</span>
                     </div>
                     
-                    <div class="data_field" style="cursor:pointer;" onclick="showPaymentHistory('${item.id}')">
+                    <div class="data_field" style="cursor:pointer; min-width: 130px;" onclick="showPaymentHistory('${item.id}')">
                         <span class="label_text">💰 Payment Log</span>
-                        <span class="value_text" style="color:${item.paymentSummary.installments > 0 ? '#2ecc71' : '#ccc'}; font-weight:700;">
-                            ${item.paymentSummary.installments > 0 ? '₹' + item.paymentSummary.totalPaid.toLocaleString() : 'No Payments'}
-                        </span>
-                        ${item.paymentSummary.installments > 0 ? `<span style="font-size:9px; color:#888;">(${item.paymentSummary.installments} inst.)</span>` : ''}
-                        ${item.surveyAmount > 0 ? `<span style="font-size:9px; color:${(item.surveyAmount - item.paymentSummary.totalPaid) > 0 ? '#e74c3c' : '#2ecc71'};">
-                            ${(item.surveyAmount - item.paymentSummary.totalPaid) > 0 ? 'Bal: ₹' + (item.surveyAmount - item.paymentSummary.totalPaid).toLocaleString() : '✅ Cleared'}
-                        </span>` : ''}
+                        ${item.surveyAmount > 0 ? (() => {
+                            const discount = item.paymentSummary.totalReduction || 0;
+                            const due = Math.max(0, item.surveyAmount - item.paymentSummary.totalPaid - discount);
+                            return `
+                                <div style="font-size: 13px; font-weight: 700; margin-top: 3px;">
+                                    Total: <span style="color:#2d5a27;">₹${item.surveyAmount.toLocaleString()}</span>
+                                </div>
+                                ${discount > 0 ? `
+                                    <div style="font-size: 11px; margin-top: 1px; color:#e67e22; font-weight:bold;">
+                                        Discount: <span>-₹${discount.toLocaleString()}</span>
+                                    </div>
+                                ` : ''}
+                                <div style="font-size: 11px; margin-top: 2px;">
+                                    Paid: <span style="color:#27ae60; font-weight:bold;">₹${item.paymentSummary.totalPaid.toLocaleString()}</span>
+                                </div>
+                                <div style="font-size: 11px; margin-top: 1px;">
+                                    Due: <span style="color:${due > 0 ? '#e74c3c' : '#27ae60'}; font-weight:bold;">
+                                        ${due > 0 ? '₹' + due.toLocaleString() : '✅ Cleared'}
+                                    </span>
+                                </div>
+                            `;
+                        })() : `
+                            <span class="value_text" style="color:#ccc; display:block; margin-top:5px;">No Price Set</span>
+                        `}
                     </div>
-
+ 
                     <div class="data_field">
                         <span class="label_text">Area</span>
                         <span class="value_text">${item.area}</span>
@@ -599,7 +640,19 @@
                 const totalPaid = data.totalPaid || history.reduce((s,p)=>s+(p.initialAmountPaid||0),0);
                 const balance = data.balance || Math.max(0, surveyAmount - totalPaid);
                 
-                if (history.length === 0 && surveyAmount === 0) {
+                // Fetch reduction history
+                let reductionHistory = [];
+                try {
+                    const redRes = await authorizedFetch(`/api/surveys/${id}/amount-history`);
+                    if (redRes.ok) {
+                        const redData = await redRes.json();
+                        reductionHistory = redData.history || [];
+                    }
+                } catch(e) {
+                    console.warn("Could not fetch reduction history:", e);
+                }
+
+                if (history.length === 0 && reductionHistory.length === 0 && surveyAmount === 0) {
                     list.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">No payments recorded for this survey yet.</p>';
                     return;
                 }
@@ -622,19 +675,63 @@
                         </div>`;
                 }
                 
-                list.innerHTML = summaryHtml + (history.length === 0 ? '<p style="text-align:center;padding:10px;color:#999;font-size:12px;">No installments recorded yet.</p>' :
-                    history.slice().reverse().map(p => `
-                    <div style="border-bottom:1px solid #eee; padding:14px 0; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:14px; font-weight:700; color:#2d5a27;">₹${(p.initialAmountPaid || 0).toLocaleString()}</div>
-                            <div style="font-size:11px; color:#888;">via ${p.receivedOn || 'Cash'}</div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="font-size:11px; color:#444;">${p.receivedDate ? new Date(p.receivedDate).toLocaleDateString() : ''}</div>
-                            ${(p.amountReduction > 0) ? `<div style="font-size:9px; color:#e74c3c;">Discount: ₹${p.amountReduction}</div>` : ''}
-                        </div>
-                    </div>
-                `).join(''));
+                // Merge payments and reductions chronologically
+                const items = [];
+                history.forEach(p => {
+                    items.push({
+                        type: 'payment',
+                        amount: p.initialAmountPaid || 0,
+                        reduction: p.amountReduction || 0,
+                        method: p.receivedOn || 'Cash',
+                        date: p.receivedDate || p.createdAt,
+                        raw: p
+                    });
+                });
+                reductionHistory.forEach(r => {
+                    items.push({
+                        type: 'reduction',
+                        amount: r.reductionAmount || 0,
+                        oldAmount: r.oldAmount,
+                        newAmount: r.newAmount,
+                        reason: r.reason,
+                        date: r.createdAt,
+                        raw: r
+                    });
+                });
+
+                // Sort descending (latest first)
+                items.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                const listHtml = items.map(item => {
+                    if (item.type === 'payment') {
+                        return `
+                            <div style="border-bottom:1px solid rgba(255, 255, 255, 0.1); padding:14px 0; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:14px; font-weight:700; color:#2d5a27;">₹${item.amount.toLocaleString()}</div>
+                                    <div style="font-size:11px; color:#888;">Installment via ${item.method}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:11px; color:#444;">${item.date ? new Date(item.date).toLocaleDateString() : ''}</div>
+                                    ${item.reduction > 0 ? `<div style="font-size:9px; color:#e74c3c;">Discount: ₹${item.reduction.toLocaleString()}</div>` : ''}
+                                </div>
+                            </div>`;
+                    } else {
+                        return `
+                            <div style="border-bottom:1px solid rgba(255, 255, 255, 0.1); padding:14px 0; display:flex; justify-content:space-between; align-items:center; background: rgba(230, 126, 34, 0.08); border-radius: 8px; margin: 4px 0; padding-left: 10px; padding-right: 10px;">
+                                <div>
+                                    <div style="font-size:14px; font-weight:700; color:#e67e22;">✂️ -₹${item.amount.toLocaleString()}</div>
+                                    <div style="font-size:11px; color:#888;">Agreed Price Reduced (${item.oldAmount.toLocaleString()} ➔ ${item.newAmount.toLocaleString()})</div>
+                                    <div style="font-size:10px; color:#999; font-style:italic;">Reason: ${item.reason}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:11px; color:#444;">${item.date ? new Date(item.date).toLocaleDateString() : ''}</div>
+                                    <div style="font-size:9px; color:#e67e22; font-weight:700;">Price Reduction</div>
+                                </div>
+                            </div>`;
+                    }
+                }).join('');
+
+                list.innerHTML = summaryHtml + (items.length === 0 ? '<p style="text-align:center;padding:10px;color:#999;font-size:12px;">No transactions recorded yet.</p>' : listHtml);
                 
             } catch (err) {
                 list.innerHTML = '<p style="text-align:center; color:#e74c3c;">Failed to load payments.</p>';

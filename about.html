@@ -237,13 +237,13 @@
             <nav class="menu" id="sideMenu">
                 <p class="menu-label">Main Menu</p>
                 <a href="home.html" class="menu-item restricted"><span>🏠</span> Home</a>
-                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
                 <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
-                <a href="about.html" class="menu-item active"><span>✨</span> About Creator</a>
+                <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
                 <a href="settings.html" class="menu-item restricted"><span>⚙️</span> Settings</a>
             </nav>
             <div class="sidebar-footer">
-                <button onclick="location.href='index.html'" class="logout-btn">Back to Site</button>
+                <button onclick="handleBack()" class="logout-btn">Back to Site</button>
             </div>
         </aside>
 
@@ -329,6 +329,10 @@
             const role = localStorage.getItem("userRole");
             if (role === "Worker") {
                 document.querySelectorAll(".restricted").forEach(el => el.style.display = "none");
+            }
+            if (role === "Admin" || role === "Owner") {
+                const el = document.getElementById("adminLink");
+                if (el) el.style.display = "block";
             }
         });
     </script>

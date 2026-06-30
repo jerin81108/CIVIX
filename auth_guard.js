@@ -38,6 +38,75 @@
         options.headers['Authorization'] = `Bearer ${idToken}`;
         return fetch(url, options);
     };
+
+    // 6. Global Logout Handler (closes affairs and redirects to index)
+    window.handleLogout = function() {
+        if (confirm("Are you sure you want to logout from the Civil Survey Portal?")) {
+            const darkMode = localStorage.getItem('darkMode');
+            localStorage.clear();
+            if (darkMode) {
+                localStorage.setItem('darkMode', darkMode);
+            }
+            window.location.href = "index.html";
+        }
+    };
+
+    // 7. Global Back Handler (redirects to home if logged in, index otherwise)
+    window.handleBack = function() {
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = "home.html";
+        } else {
+            window.location.href = "index.html";
+        }
+    };
+
+    // 8. Auto-apply Dark Theme to body on load
+    document.addEventListener("DOMContentLoaded", function() {
+        if (localStorage.getItem("darkMode") === "enabled") {
+            document.body.classList.add("dark_theme");
+        }
+    });
+
+    // 9. SECURITY: Anti-Copy & Anti-Screenshot Handlers
+    
+    // Prevent Right Click
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // Prevent Keyboard Shortcuts (Ctrl+P, Ctrl+S, Ctrl+C, PrintScreen)
+    document.addEventListener('keydown', (e) => {
+        // Prevent Print Screen key
+        if (e.key === 'PrintScreen') {
+            navigator.clipboard.writeText('');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Prevent Ctrl+P (Print), Ctrl+S (Save), Ctrl+C (Copy), Mac OS Command key
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key === 'p' || e.key === 's' || e.key === 'c' || e.key === 'P' || e.key === 'S' || e.key === 'C') {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+    
+    document.addEventListener('keyup', (e) => {
+        if (e.key === 'PrintScreen') {
+            navigator.clipboard.writeText('');
+            e.preventDefault();
+        }
+    });
+
+    // Prevent Snipping Tool / OS Screenshots via Focus Loss Blur
+    window.addEventListener('blur', () => {
+        document.body.style.filter = 'blur(20px)';
+        document.body.style.opacity = '0.3';
+    });
+    window.addEventListener('focus', () => {
+        document.body.style.filter = 'none';
+        document.body.style.opacity = '1';
+    });
+
 })();
 
 

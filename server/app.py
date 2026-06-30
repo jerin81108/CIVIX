@@ -432,10 +432,11 @@ def add_survey():
         # Check if it's multipart/form-data (contains file) or JSON
         if request.content_type.startswith('multipart/form-data'):
             data = request.form
-            file = request.files.get('file')
+            # Support both 'files' (multiple) and 'file' (legacy/single)
+            uploaded_files = request.files.getlist('files') or request.files.getlist('file')
         else:
             data = request.json
-            file = None
+            uploaded_files = []
 
         email = data.get('createdBy')
         user = users_col.find_one({"email": email})
@@ -446,21 +447,20 @@ def add_survey():
         if user.get('status') != 'Approved':
             return jsonify({"message": "Account not approved."}), 403
 
-        file_name = None
-        file_path = None
-        
-        if file:
-            from werkzeug.utils import secure_filename
-            file_name = secure_filename(file.filename)
-            upload_folder = os.path.join(ROOT_DIR, 'uploads')
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
-            
-            # Add timestamp to avoid filename collisions
-            unique_filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{file_name}"
-            file.save(os.path.join(upload_folder, unique_filename))
-            file_path = f"/uploads/{unique_filename}"
-            file_name = unique_filename
+        files_data = []
+        upload_folder = os.path.join(ROOT_DIR, 'uploads')
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+
+        from werkzeug.utils import secure_filename
+        for file in uploaded_files:
+            if file and file.filename:
+                file_name = secure_filename(file.filename)
+                # Add timestamp to avoid filename collisions
+                unique_filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{file_name}"
+                file.save(os.path.join(upload_folder, unique_filename))
+                file_path = f"/uploads/{unique_filename}"
+                files_data.append({"name": unique_filename, "path": file_path})
 
         now = datetime.utcnow().isoformat()
         date = data.get('date', datetime.utcnow().strftime('%Y-%m-%d'))
@@ -478,6 +478,8 @@ def add_survey():
                 "size": data['size'],
                 "loc": data['loc'],
                 "emp": data['emp'],
+                "company": data.get('company', ''),
+                "finishingDate": data.get('finishingDate', ''),
                 "cli": data['cli'],
                 "cliNum": data.get('cliNum', ''),
                 "area": data['area'],
@@ -486,8 +488,9 @@ def add_survey():
                 "tempC": data.get('tempC', '25'),
                 "date": date,
                 "time": time,
-                "fileName": file_name,
-                "filePath": file_path,
+                "files": files_data,
+                "fileName": files_data[0]["name"] if files_data else None,
+                "filePath": files_data[0]["path"] if files_data else None,
                 "surveyAmount": survey_amount,
                 "createdBy": email,
                 "createdAt": now
@@ -544,6 +547,8 @@ def update_survey(id):
             "size": data['size'],
             "loc": data['loc'],
             "emp": data['emp'],
+            "company": data.get('company', ''),
+            "finishingDate": data.get('finishingDate', ''),
             "cli": data['cli'],
             "cliNum": data.get('cliNum', ''),
             "area": data['area'],
@@ -554,6 +559,27 @@ def update_survey(id):
             "time": data['time'],
             "updatedAt": now
         }
+
+        # Check for new files in edit
+        uploaded_files = request.files.getlist('files') or request.files.getlist('file') if request.files else []
+        # filter out empty files
+        uploaded_files = [f for f in uploaded_files if f and f.filename]
+        if uploaded_files:
+            files_data = []
+            upload_folder = os.path.join(ROOT_DIR, 'uploads')
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+            from werkzeug.utils import secure_filename
+            for file in uploaded_files:
+                file_name = secure_filename(file.filename)
+                unique_filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{file_name}"
+                file.save(os.path.join(upload_folder, unique_filename))
+                file_path = f"/uploads/{unique_filename}"
+                files_data.append({"name": unique_filename, "path": file_path})
+            
+            update_data["files"] = files_data
+            update_data["fileName"] = files_data[0]["name"]
+            update_data["filePath"] = files_data[0]["path"]
 
         # If a new surveyAmount is provided in the update, just store it — no auto reduction logging.
         # Reductions must be made explicitly via /api/surveys/<id>/reduce-amount

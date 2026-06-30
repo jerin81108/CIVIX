@@ -18,13 +18,14 @@
         <aside class="sidebar">
             <div class="sidebar-header"><h3>Admin Center</h3></div>
             <nav class="menu">
+                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
                 <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
-                <a href="workers.html" class="menu-item"><span>👥</span> Workers Directory</a>
-                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
-                <a href="admin.html" class="menu-item active"><span>👥</span> Admin Dashboard</a>
+                <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
+                <a href="admin.html" id="adminLink" class="menu-item active"><span>👥</span> Admin Dashboard</a>
+                <a href="settings.html" class="menu-item"><span>⚙️</span> Settings</a>
             </nav>
             <div class="sidebar-footer">
-                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+                <button onclick="handleLogout()" class="logout-btn">Logout</button>
             </div>
         </aside>
         <main class="main-content">
@@ -32,6 +33,13 @@
                 <h2>Admin Dashboard</h2>
                 <button onclick="location.href='registration.html'" class="approve-btn" style="background: var(--primary);">+ Create New Employee</button>
             </header>
+
+            <!-- Sub-navigation for Admin Dashboard sub-pages -->
+            <div class="sub-nav-container" style="display: flex; gap: 15px; margin: 15px 0 25px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); backdrop-filter: blur(10px);">
+                <a href="admin.html" class="sub-nav-item active" style="font-weight: 700; color: #2d5a27; text-decoration: none; border-bottom: 3.5px solid #2d5a27; padding: 8px 16px; border-radius: 6px; background: rgba(45, 90, 39, 0.08); transition: 0.2s;">🛡️ Dashboard</a>
+                <a href="messages.html" class="sub-nav-item" style="font-weight: 600; color: #666; text-decoration: none; padding: 8px 16px; transition: 0.2s; border-radius: 6px;">✉️ Guest Messages</a>
+                <a href="workers.html" class="sub-nav-item" style="font-weight: 600; color: #666; text-decoration: none; padding: 8px 16px; transition: 0.2s; border-radius: 6px;">👥 Workers Directory</a>
+            </div>
             
             <section style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; display: none;">
                 <h3>Create New Employee ID</h3>

@@ -52,28 +52,15 @@
 
             <nav class="menu">
                 <p class="menu-label">Main Menu</p>
-                <a href="home.html" class="menu-item"><span>🏠</span> Home</a>
-                <a href="profile.html" class="menu-item"><span>👤</span> Profile</a>
+                <a href="home.html" class="menu-item active"><span>🏠</span> Home</a>
                 <a href="survey.html" class="menu-item"><span>📊</span> Survey Logs</a>
                 <a href="payment.html" class="menu-item"><span>💳</span> Payments</a>
-                <a href="messages.html" id="msgLink" class="menu-item" style="display:none;"><span>✉️</span> Guest
-                    Messages <span id="msgBadge" class="noti-badge">0</span></a>
-                <a href="tickets.html" id="ticketLink" class="menu-item" style="display:none;"><span>🎫</span> Change
-                    Requests <span id="ticketBadge" class="noti-badge">0</span></a>
-                <a href="about.html" class="menu-item"><span>✨</span> About Creator</a>
-                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin
-                    Dashboard</a>
-                <a href="workers.html" id="workerLink" class="menu-item" style="display:none;"><span>👥</span> Workers
-                    Directory</a>
-
+                <a href="admin.html" id="adminLink" class="menu-item" style="display:none;"><span>👥</span> Admin Dashboard</a>
                 <a href="settings.html" class="menu-item"><span>⚙️</span> Settings</a>
-                <p class="menu-label">Project Intelligence</p>
-                <div class="menu-item locked"><span>📍</span> Land Mapping (Soon)</div>
-                <div class="menu-item active"><span>📊</span> Analytics</div>
             </nav>
 
             <div class="sidebar-footer">
-                <button onclick="location.href='index.html'" class="logout-btn">Logout</button>
+                <button onclick="handleLogout()" class="logout-btn">Logout</button>
             </div>
         </aside>
 
@@ -95,24 +82,24 @@
             <section class="premium-stats-grid"
                 style="margin-top: 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; animation: slideUp 0.6s ease-out;">
                 <div class="card stat-card-glass">
-                    <span class="stat-label">Total Volume</span>
+                    <span class="stat-label">Total Surveys</span>
                     <h3 id="total_surveys_stat">2,481</h3>
-                    <span class="stat-trend">↑ 12% Month</span>
+                    <span class="stat-trend">↑ 12% This Month</span>
                 </div>
                 <div class="card stat-card-glass">
-                    <span class="stat-label">Active Sites</span>
+                    <span class="stat-label">Active Areas</span>
                     <h3>42</h3>
-                    <span class="stat-trend" style="color:#3498db;">Global UTM Tracking</span>
+                    <span class="stat-trend" style="color:#3498db;">Tracked Locations</span>
                 </div>
                 <div class="card stat-card-glass">
-                    <span class="stat-label">Team Pulse</span>
-                    <h3>98%</h3>
-                    <span class="stat-trend">Standardized Error</span>
+                    <span class="stat-label">System Accuracy</span>
+                    <h3>99.9%</h3>
+                    <span class="stat-trend">Standardized Standard</span>
                 </div>
                 <div class="card stat-card-glass">
-                    <span class="stat-label">Efficiency</span>
+                    <span class="stat-label">Response Time</span>
                     <h3>0.02s</h3>
-                    <span class="stat-trend" style="color:#e67e22;">Latency Optimized</span>
+                    <span class="stat-trend" style="color:#e67e22;">Super Fast Loading</span>
                 </div>
             </section>
             <section class="dashboard_grid">
@@ -127,9 +114,9 @@
                         </svg>
                     </div>
                     <div class="card_info">
-                        <span class="label">Blueprint Viewer</span>
-                        <h2>I.F. Plan</h2>
-                        <p style="font-size: 11px; color: #f1c40f; font-weight: bold;">Click to expand Topo Sketches</p>
+                        <span class="label">Factory Plan Viewer</span>
+                        <h2>Industrial Layout</h2>
+                        <p style="font-size: 11px; color: #f1c40f; font-weight: bold;">Click to view Industrial Sketches</p>
                     </div>
                 </div>
 
@@ -143,10 +130,9 @@
                         </svg>
                     </div>
                     <div class="card_info">
-                        <span class="label">Panchayat Plan Viewer</span>
-                        <h2>Home Plan</h2>
-                        <p style="font-size: 11px; color: #3498db; font-weight: bold;">Click to expand Architect
-                            Sketches</p>
+                        <span class="label">House Plan Viewer</span>
+                        <h2>Residential Layout</h2>
+                        <p style="font-size: 11px; color: #3498db; font-weight: bold;">Click to view Home Sketches</p>
                     </div>
                 </div>
 
@@ -157,7 +143,7 @@
                         </svg>
                     </div>
                     <div class="card_info">
-                        <span class="label">Mapped Units</span>
+                        <span class="label">Completed Surveys</span>
                         <h2 id="total_survey_count">0</h2>
                     </div>
                     <div class="card_progress_bar">
@@ -173,22 +159,18 @@
                         </svg>
                     </div>
                     <div class="card_info">
-                        <span class="label">Field Schedule</span>
-                        <h2 id="appointment_status">On Track</h2>
-                        <p id="appointment_detail" style="font-size: 11px; color: #2ecc71; font-weight: bold;">Precision
-                            in Progress</p>
+                        <span class="label">Survey Schedule</span>
+                        <h2 id="appointment_status">On Time</h2>
+                        <p id="appointment_detail" style="font-size: 11px; color: #2ecc71; font-weight: bold;">No delays recorded</p>
                     </div>
                 </div>
 
                 <div class="card motivation-card">
                     <div class="card_info">
-                        <span class="label">💡 Daily Inspiration</span>
+                        <span class="label">💡 Daily Motivation</span>
                         <p id="engineers_quote"
-                            style="font-style: italic; font-size: 13px; color: #444; margin-top: 5px;">"Engineering is
-                            the art of directing the great sources of power in nature for the use and convenience of
-                            man."</p>
-                        <span id="quote_author" style="font-size: 11px; color: #888; font-weight: 600;">— Thomas
-                            Tredgold</span>
+                            style="font-style: italic; font-size: 13px; color: #444; margin-top: 5px;">"Engineering is the art of directing sources of power in nature for the convenience of man."</p>
+                        <span id="quote_author" style="font-size: 11px; color: #888; font-weight: 600;">— Thomas Tredgold</span>
                     </div>
                 </div>
             </section>
@@ -197,13 +179,13 @@
             <section class="analytics-showcase"
                 style="margin-top: 40px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
                 <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
-                    <h3 style="margin-top: 0; color: #2d5a27;">📈 Survey Velocity</h3>
+                    <h3 style="margin-top: 0; color: #2d5a27;">📈 Survey Progress Trend</h3>
                     <div style="width: 100%; height: 250px;">
                         <canvas id="velocityChart"></canvas>
                     </div>
                 </div>
                 <div class="card survey-card-premium" style="width: auto; flex-direction: column; align-items: start;">
-                    <h3 style="margin-top: 0; color: #2d5a27;">📍 Map Distribution</h3>
+                    <h3 style="margin-top: 0; color: #2d5a27;">📍 Location Statistics</h3>
                     <div style="width: 100%; height: 250px;">
                         <canvas id="locationChart"></canvas>
                     </div>
@@ -222,33 +204,33 @@
                 style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 <div class="card survey-card-premium"
                     style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #f1c40f;">
-                    <span class="label" style="font-size: 10px; color: #888;">🛰️ GNSS STATUS</span>
+                    <span class="label" style="font-size: 10px; color: #888;">🛰️ GPS TRACKING STATUS</span>
                     <div style="display: flex; justify-content: space-between; width: 100%;">
-                        <span style="font-weight: 800; color: #2d5a27;">FIXED (RTK)</span>
-                        <span style="color: #2ecc71; font-size: 12px;">● Online</span>
+                        <span style="font-weight: 800; color: #2d5a27;">HIGH ACCURACY</span>
+                        <span style="color: #2ecc71; font-size: 12px;">● Connected</span>
                     </div>
-                    <p style="font-size: 11px; margin: 0; color: #666;">H: 0.008m | V: 0.015m</p>
+                    <p style="font-size: 11px; margin: 0; color: #666;">Optimal Satellite Signal Lock</p>
                 </div>
                 <div class="card survey-card-premium"
                     style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #3498db;">
-                    <span class="label" style="font-size: 10px; color: #888;">🌏 COORDINATE SYSTEM</span>
-                    <span style="font-weight: 800; color: #333;">UTM ZONE 44N</span>
-                    <p style="font-size: 11px; margin: 0; color: #666;">WGS84 Ellipsoid | EPSG:32644</p>
+                    <span class="label" style="font-size: 10px; color: #888;">🌏 MAP ZONE REGION</span>
+                    <span style="font-weight: 800; color: #333;">GRID ZONE 44N</span>
+                    <p style="font-size: 11px; margin: 0; color: #666;">Standard Local Coordinate Grid</p>
                 </div>
                 <div class="card survey-card-premium"
                     style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #e67e22;">
-                    <span class="label" style="font-size: 10px; color: #888;">📐 INSTRUMENT ERROR</span>
+                    <span class="label" style="font-size: 10px; color: #888;">📐 DEVICE PRECISION</span>
                     <div style="display: flex; justify-content: space-between; width: 100%;">
-                        <span style="font-weight: 800; color: #333;">2.4" ARC SEC</span>
+                        <span style="font-weight: 800; color: #333;">MAX PRECISION</span>
                         <span style="color: #e67e22; font-size: 10px;">Calibrated</span>
                     </div>
-                    <p style="font-size: 11px; margin: 0; color: #666;">Compensator: Enabled</p>
+                    <p style="font-size: 11px; margin: 0; color: #666;">Sensors Status: Perfect</p>
                 </div>
                 <div class="card survey-card-premium"
                     style="flex-direction: column; align-items: start; gap: 8px; border-left: 4px solid #9b59b6;">
-                    <span class="label" style="font-size: 10px; color: #888;">🏗️ SCALE FACTOR</span>
-                    <span style="font-weight: 800; color: #333;">0.99994520</span>
-                    <p style="font-size: 11px; margin: 0; color: #666;">Grid to Ground Correction</p>
+                    <span class="label" style="font-size: 10px; color: #888;">🏗️ GRID TO GROUND MATCH</span>
+                    <span style="font-weight: 800; color: #333;">PERFECT MATCH</span>
+                    <p style="font-size: 11px; margin: 0; color: #666;">Scale Correction Applied</p>
                 </div>
             </section>
 
