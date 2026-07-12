@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Fill Survey Details - B.K Builders</title>
     <script src="auth_guard.js"></script>
+    <script src="file_manager.js"></script>
     <link rel="stylesheet" href="home_style.css">
     <style>
         body {
@@ -222,7 +223,14 @@
                 <label class="field-label" style="margin-top:14px;">Finishing Date</label>
                 <input type="date" id="finishing_date" required>
 
-                <label class="field-label" style="margin-top:18px;">Attach Files <span style="font-weight:400; color:#bbb;">(Optional, multiple allowed)</span></label>
+                <!-- Existing Files (visible in edit mode if present) -->
+                <div id="existingFilesContainer" style="display:none; margin-top:14px;">
+                    <label class="field-label">Current Files</label>
+                    <div id="existingFilesList" style="background:#f9f9f9; padding:12px; border-radius:8px; border:1.5px solid #e0e0e0; display:flex; flex-direction:column; gap:8px;">
+                    </div>
+                </div>
+
+                <label class="field-label" style="margin-top:18px;">Attach New Files <span style="font-weight:400; color:#bbb;">(Optional, multiple allowed)</span></label>
                 <input type="file" id="survey_file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple>
                 <p class="file-note">Accepted: PDF, JPG, PNG, DOC, DOCX</p>
 
@@ -297,6 +305,50 @@
                         document.getElementById('client_num').value  = data.cliNum || '';
                         document.getElementById('area').value        = data.area   || '';
                         document.getElementById('survey_date').value = data.date   || '';
+
+                        // Populate existing files
+                        const filesContainer = document.getElementById('existingFilesContainer');
+                        const filesList = document.getElementById('existingFilesList');
+                        filesList.innerHTML = '';
+                        
+                        let hasFiles = false;
+                        if (data.files && data.files.length > 0) {
+                            hasFiles = true;
+                            data.files.forEach((f, idx) => {
+                                const fileItem = document.createElement('div');
+                                fileItem.style.display = 'flex';
+                                fileItem.style.alignItems = 'center';
+                                fileItem.style.gap = '8px';
+                                fileItem.style.marginBottom = '6px';
+                                fileItem.innerHTML = `
+                                    <span style="font-size: 14px;">📄</span>
+                                    <span style="font-size: 13px; font-weight: 600; color: #333; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.name || `File ${idx+1}`}</span>
+                                    <button type="button" onclick="previewFile('${f.path}', '${f.name}')" class="file-action-btn view-btn" style="font-size:11px; padding:2px 6px;">👁️ View</button>
+                                    <button type="button" onclick="shareFile('${f.path}', '${f.name}')" class="file-action-btn share-btn" style="font-size:11px; padding:2px 6px;">📤 Send</button>
+                                `;
+                                filesList.appendChild(fileItem);
+                            });
+                        } else if (data.filePath) {
+                            hasFiles = true;
+                            const fileItem = document.createElement('div');
+                            fileItem.style.display = 'flex';
+                            fileItem.style.alignItems = 'center';
+                            fileItem.style.gap = '8px';
+                            fileItem.style.marginBottom = '6px';
+                            fileItem.innerHTML = `
+                                <span style="font-size: 14px;">📄</span>
+                                <span style="font-size: 13px; font-weight: 600; color: #333; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${data.fileName || 'Attachment'}</span>
+                                <button type="button" onclick="previewFile('${data.filePath}', '${data.fileName}')" class="file-action-btn view-btn" style="font-size:11px; padding:2px 6px;">👁️ View</button>
+                                <button type="button" onclick="shareFile('${data.filePath}', '${data.fileName}')" class="file-action-btn share-btn" style="font-size:11px; padding:2px 6px;">📤 Send</button>
+                            `;
+                            filesList.appendChild(fileItem);
+                        }
+
+                        if (hasFiles) {
+                            filesContainer.style.display = 'block';
+                        } else {
+                            filesContainer.style.display = 'none';
+                        }
                     }
                 } catch (err) {
                     console.error('Error fetching survey for edit:', err);

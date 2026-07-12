@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deleted Survey Archive - B.K Builders</title>
     <script src="auth_guard.js"></script>
+    <script src="file_manager.js"></script>
     <link rel="stylesheet" href="home_style.css">
     <style>
         /* ── Search bar ────────────────────────────── */
@@ -322,7 +323,11 @@
                     : `<span class="sf-value na">N/A</span>`;
 
                 const fileLink = s.filePath
-                    ? `<a href="${s.filePath}" target="_blank" style="color:#3498db; font-size:12px; font-weight:700;">📄 View File</a>`
+                    ? `
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px;">
+                            <button onclick="previewFile('${s.filePath}', '${s.fileName || 'Archive_File'}')" class="file-action-btn view-btn" style="padding: 3px 8px; font-size: 11px; margin:0;">👁️ View</button>
+                            <button onclick="shareFile('${s.filePath}', '${s.fileName || 'Archive_File'}')" class="file-action-btn share-btn" style="padding: 3px 8px; font-size: 11px; margin:0;">📤 Send</button>
+                        </div>`
                     : `<span class="sf-value na">No File</span>`;
 
                 return `

@@ -172,7 +172,7 @@ async function verifyWithBackend(idToken, displayName = null) {
 async function logout() {
     await auth.signOut();
     localStorage.clear();
-    window.location.href = "index.html";
+    window.location.replace("index.html");
 }
 
 // Preview Image function... (kept as is)

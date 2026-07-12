@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Survey Records - B.K Builders</title>
     <script src="auth_guard.js"></script>
+    <script src="file_manager.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="home_style.css">
     <style>
@@ -26,6 +27,15 @@
         }
         .label { font-size: 11px; color: #777; text-transform: uppercase; display: block; }
         .value { font-size: 14px; font-weight: bold; color: #333; }
+        .action-row {
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            align-items: center;
+            white-space: normal;
+        }
     </style>
 </head>
 <body>
@@ -79,9 +89,39 @@
                 div.className = "horizontal_card";
                 
                 const canEdit = (item.createdBy === userEmail || userRole === 'Admin');
-                const editBtn = canEdit ? `<button onclick="editRecord('${item._id}')" style="margin-top: 10px; background: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Edit</button>` : '';
+                const fileItem = (item.files && item.files.length > 0) ? item.files[0] : (item.filePath ? {path: item.filePath, name: item.fileName} : null);
+                
+                let actionButtonsHtml = '';
+                if (canEdit) {
+                    actionButtonsHtml += `<button onclick="editRecord('${item._id}')" style="background: #f39c12; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Edit</button>`;
+                }
+                if (fileItem) {
+                    actionButtonsHtml += `<button onclick="previewFile('${fileItem.path}', '${fileItem.name}')" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">👁️ View File</button>`;
+                    actionButtonsHtml += `<button onclick="shareFile('${fileItem.path}', '${fileItem.name}')" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">📤 Send File</button>`;
+                }
 
-                const fileLink = item.filePath ? `<a href="${item.filePath}" target="_blank" style="color: #2d5a27;">Reach File 📄</a>` : 'N/A';
+                let fileLink = 'N/A';
+                if (item.files && item.files.length > 0) {
+                    fileLink = item.files.map((f, idx) => `
+                        <div style="margin-bottom: 6px; border-bottom: 1px dashed #eee; padding-bottom: 4px;">
+                            <div style="font-size: 11px; font-weight: bold; color: #555;">File ${idx+1}</div>
+                            <span style="font-size: 9px; color: #888; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;" title="${f.name}">${f.name}</span>
+                            <div style="display: flex; gap: 4px; margin-top: 3px;">
+                                <button onclick="previewFile('${f.path}', '${f.name}')" class="file-action-btn view-btn" style="padding: 2px 5px; font-size: 10px;">👁️ View</button>
+                                <button onclick="shareFile('${f.path}', '${f.name}')" class="file-action-btn share-btn" style="padding: 2px 5px; font-size: 10px;">📤 Send</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else if (item.filePath) {
+                    fileLink = `
+                        <div style="margin-bottom: 6px; border-bottom: 1px dashed #eee; padding-bottom: 4px;">
+                            <span style="font-size: 9px; color: #888; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;" title="${item.fileName}">${item.fileName}</span>
+                            <div style="display: flex; gap: 4px; margin-top: 3px;">
+                                <button onclick="previewFile('${item.filePath}', '${item.fileName}')" class="file-action-btn view-btn" style="padding: 2px 5px; font-size: 10px;">👁️ View</button>
+                                <button onclick="shareFile('${item.filePath}', '${item.fileName}')" class="file-action-btn share-btn" style="padding: 2px 5px; font-size: 10px;">📤 Send</button>
+                            </div>
+                        </div>`;
+                }
 
                 div.innerHTML = `
                     <div class="data_item"><span class="label">Date/Time</span><span class="value">${item.date} ${item.time}</span></div>
@@ -93,7 +133,12 @@
                     <div class="data_item"><span class="label">File</span><span class="value">${fileLink}</span></div>
                     <div class="data_item"><span class="label">Location</span><span class="value">${item.loc}</span></div>
                     <div class="data_item"><span class="label">Size</span><span class="value">${item.size}</span></div>
-                    ${editBtn}
+                    <div class="data_item" style="min-width: 260px;">
+                        <span class="label">Actions</span>
+                        <div class="action-row">
+                            ${actionButtonsHtml}
+                        </div>
+                    </div>
                 `;
                 list.appendChild(div);
             });

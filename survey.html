@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Survey Records - B.K Builders</title>
     <script src="auth_guard.js"></script>
+    <script src="file_manager.js"></script>
     <!-- Excel Export Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="home_style.css">
@@ -89,6 +90,18 @@
         .edit-badge:hover {
             background: #27ae60;
             color: white;
+        }
+        .action-row {
+            display: flex;
+            flex-direction: row;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+            align-items: center;
+            white-space: normal;
+        }
+        .action-row .edit-badge {
+            flex-shrink: 0;
         }
 
         /* Token Modal Styles */
@@ -313,17 +326,23 @@
                 box.className = "horizontal_box";
                 
                 let fileHtml = '';
+                const primaryFile = (item.files && item.files.length > 0) ? item.files[0] : (item.filePath ? {path: item.filePath, name: item.fileName} : null);
+
                 if (item.files && item.files.length > 0) {
-                    const fileLinks = item.files.map((f, idx) => 
-                        `<div style="margin-bottom: 4px;">
-                            <a href="${f.path}" target="_blank" class="value_text" style="color:#2d5a27; text-decoration:underline; font-size:12px;">File ${idx+1} 📄</a>
-                            <span style="font-size:9px; color:#999; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;" title="${f.name}">${f.name}</span>
-                         </div>`
-                    ).join('');
+                    const fileLinks = item.files.map((f, idx) => `
+                        <div style="margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 6px;">
+                            <div style="font-weight: 600; font-size: 11px; color: #333; margin-bottom: 2px;">File ${idx+1}</div>
+                            <span style="font-size:9px; color:#666; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px; margin-bottom: 4px;" title="${f.name}">${f.name}</span>
+                            <div style="display: flex; gap: 4px;">
+                                <button onclick="previewFile('${f.path}', '${f.name}')" class="file-action-btn view-btn" style="padding: 2px 6px; font-size: 10px;">👁️ View</button>
+                                <button onclick="shareFile('${f.path}', '${f.name}')" class="file-action-btn share-btn" style="padding: 2px 6px; font-size: 10px;">📤 Send</button>
+                            </div>
+                        </div>
+                    `).join('');
                     fileHtml = `
                         <div class="data_field">
                             <span class="label_text">Attached Files (${item.files.length})</span>
-                            <div style="max-height:80px; overflow-y:auto; padding-right:5px;">
+                            <div style="max-height:100px; overflow-y:auto; padding-right:5px;">
                                 ${fileLinks}
                             </div>
                         </div>`;
@@ -331,8 +350,11 @@
                     fileHtml = `
                         <div class="data_field">
                             <span class="label_text">Received File</span>
-                            <a href="${item.filePath}" target="_blank" class="value_text" style="color:#2d5a27; text-decoration:underline;">Reach It 📄</a>
-                            <span style="font-size:9px; color:#999; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${item.fileName}</span>
+                            <span style="font-size:9px; color:#666; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px; margin-bottom: 4px;">${item.fileName}</span>
+                            <div style="display: flex; gap: 4px;">
+                                <button onclick="previewFile('${item.filePath}', '${item.fileName}')" class="file-action-btn view-btn" style="padding: 2px 6px; font-size: 10px;">👁️ View</button>
+                                <button onclick="shareFile('${item.filePath}', '${item.fileName}')" class="file-action-btn share-btn" style="padding: 2px 6px; font-size: 10px;">📤 Send</button>
+                            </div>
                         </div>`;
                 } else {
                     fileHtml = `<div class="data_field"><span class="label_text">Received File</span><span class="value_text" style="color:#ccc;">No File</span></div>`;
@@ -341,23 +363,31 @@
                 const isAdmin = (userRole === 'Admin' || userRole === 'Owner');
                 const isCreator = (userEmail === item.createdBy);
 
-                const actionButtons = isAdmin ? 
-                    `<a onclick="editRecord('${item.id}')" class="edit-badge">Edit</a>
-                     <a onclick="showHistory('${item.id}')" class="edit-badge" style="background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>` :
-                    `<a onclick="openTokenModal('${item.id}')" class="edit-badge" style="background:#fff7e6; color:#d68910; border-color:#d68910;">🎫 Book Ticket</a>`;
+                const viewShareActions = primaryFile ? `
+                    <a onclick="previewFile('${primaryFile.path}', '${primaryFile.name}')" class="edit-badge" style="background:#f0f7ff; color:#3498db; border-color:#3498db;">👁️ View File</a>
+                    <a onclick="shareFile('${primaryFile.path}', '${primaryFile.name}')" class="edit-badge" style="background:#f0fbf0; color:#2ecc71; border-color:#2ecc71;">📤 Send File</a>
+                ` : '';
 
-                const deleteBtn = (isAdmin || isCreator) ? 
+                const actionButtons = isAdmin ?
+                    `<a onclick="editRecord('${item.id}')" class="edit-badge">Edit</a>
+                     ${viewShareActions}
+                     <a onclick="showHistory('${item.id}')" class="edit-badge" style="background:#f0f7ff; color:#3498db; border-color:#3498db;">📜 History</a>` :
+                    `<a onclick="openTokenModal('${item.id}')" class="edit-badge" style="background:#fff7e6; color:#d68910; border-color:#d68910;">🎫 Book Ticket</a>
+                     ${viewShareActions}`;
+
+                const deleteBtn = (isAdmin || isCreator) ?
                     `<a onclick="initiateDelete('${item.id}')" class="edit-badge" style="background:#fff0f0; color:#e74c3c; border-color:#e74c3c;">🗑️ Delete</a>` : '';
 
                 const editBtn = `
-                    <div class="data_field" style="border:none; min-width: 250px;">
+                    <div class="data_field" style="border:none; min-width: 260px;">
                         <span class="label_text">Actions</span>
-                        <div style="display:flex; flex-direction:row; gap:6px; flex-wrap:wrap; margin-top:5px;">
+                        <div class="action-row">
                             ${actionButtons}
                             <a onclick="exportSingleToExcel('${item.id}')" class="edit-badge" style="background:#f0f7ef; color:#2ecc71; border-color:#2ecc71;">Excel</a>
                             ${deleteBtn}
                         </div>
                     </div>`;
+
 
                 box.innerHTML = `
                     <div class="data_field">

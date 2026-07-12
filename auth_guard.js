@@ -6,30 +6,39 @@
     // 1. Immediately hide the body to prevent "flickering" 
     document.documentElement.style.display = 'none';
 
-    const email = localStorage.getItem('regEmail');
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const status = localStorage.getItem('userStatus') || localStorage.getItem('status');
+    function checkAuth() {
+        const email = localStorage.getItem('regEmail');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const status = localStorage.getItem('userStatus') || localStorage.getItem('status');
 
-    const PUBLIC_PAGES = ['index.html', 'contact.html', 'about.html'];
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const PUBLIC_PAGES = ['index.html', 'contact.html', 'about.html'];
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-    // 2. Not logged in → Send to landing page if trying to access internal content
-    if (!email || isLoggedIn !== 'true') {
-        if (!PUBLIC_PAGES.includes(currentPage)) {
-            console.warn("🔐 Forbidden: Unauthorized access. Redirecting to Public Portal...");
-            window.location.replace('index.html');
+        // 2. Not logged in → Send to landing page if trying to access internal content
+        if (!email || isLoggedIn !== 'true') {
+            if (!PUBLIC_PAGES.includes(currentPage)) {
+                console.warn("🔐 Forbidden: Unauthorized access. Redirecting to Public Portal...");
+                window.location.replace('index.html');
+                return;
+            }
+        }
+
+        // 3. Logged in but Pending → Send to pending page
+        if (status === 'Pending' && !window.location.pathname.includes('pending.html')) {
+            window.location.replace('pending.html');
             return;
         }
+
+        // 4. All good? Show the page
+        document.documentElement.style.display = 'block';
     }
 
-    // 3. Logged in but Pending → Send to pending page
-    if (status === 'Pending' && !window.location.pathname.includes('pending.html')) {
-        window.location.replace('pending.html');
-        return;
-    }
+    checkAuth();
 
-    // 4. All good? Show the page
-    document.documentElement.style.display = 'block';
+    // Listen to pageshow to handle bfcache (back/forward navigation)
+    window.addEventListener('pageshow', function(event) {
+        checkAuth();
+    });
 
     // 5. Global helper for secure API calls
     window.authorizedFetch = async function(url, options = {}) {
@@ -47,7 +56,7 @@
             if (darkMode) {
                 localStorage.setItem('darkMode', darkMode);
             }
-            window.location.href = "index.html";
+            window.location.replace("index.html");
         }
     };
 

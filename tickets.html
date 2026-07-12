@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Change Requests (Tickets) - B.K Builders</title>
     <script src="auth_guard.js"></script>
+    <script src="file_manager.js"></script>
     <link rel="stylesheet" href="home_style.css">
     <style>
         .ticket-card { background: white; padding: 25px; border-radius: 18px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-left: 8px solid #f1c40f; transition: 0.3s; }
@@ -163,7 +164,14 @@
                     if (t.fieldName === 'file') {
                         try {
                             const info = JSON.parse(t.newValue);
-                            newValHtml = `New File: <a href="${info.filePath}" target="_blank" style="color:#2ecc71; text-decoration:underline;">${info.fileName}</a>`;
+                            newValHtml = `
+                                <div style="margin-top: 5px;">
+                                    <div style="font-weight: 600; font-size: 12px; color: #2ecc71; margin-bottom: 2px;">New File: ${info.fileName}</div>
+                                    <div style="display: flex; gap: 4px; margin-top: 4px;">
+                                        <button onclick="previewFile('${info.filePath}', '${info.fileName}')" class="file-action-btn view-btn" style="background:#3498db; border-color:#3498db; color:white; padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none;">👁️ View</button>
+                                        <button onclick="shareFile('${info.filePath}', '${info.fileName}')" class="file-action-btn share-btn" style="background:#2ecc71; border-color:#2ecc71; color:white; padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none;">📤 Send</button>
+                                    </div>
+                                </div>`;
                         } catch(e) {}
                     }
 
